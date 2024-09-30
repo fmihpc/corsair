@@ -1,6 +1,6 @@
 # C++ compiler and flags
 CMP=mpic++
-CXXFLAGS=-O3 -Wall -std=c++0x -Wall -pedantic -DPROFILE -DNDEBUG
+CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -DPROFILE -DNDEBUG
 MATHFLAGS=-ffast-math -funroll-loops
 
 # Archiver
@@ -19,13 +19,13 @@ INC_BOOST=-I/usr/include/boost
 LIB_BOOST=-L/usr/lib/ -lboost_program_options
 
 # ParGrid
-INC_PARGRID=-I/home/rijarvin/bin/corsair/pargrid/trunk
+INC_PARGRID=-I$(HOME)/bin/pargrid/
 LIB_PARGRID=
 
 # VLSV file format
-INC_VLSV=-I/home/rijarvin/bin/corsair/vlsv/trunk
-LIB_VLSV=-L/home/rijarvin/bin/corsair/vlsv/trunk -lvlsv
+INC_VLSV=-I$(HOME)/bin/vlsv/
+LIB_VLSV=-L$(HOME)/bin/vlsv/ -lvlsv
 
 # Zoltan
-INC_ZOLTAN=-I/home/rijarvin/bin/Zoltan_v3.6/build/include
-LIB_ZOLTAN=-L/home/rijarvin/bin/Zoltan_v3.6/build/lib -lzoltan
+INC_ZOLTAN=-I$(HOME)/bin/Zoltan-3.901/build/include/
+LIB_ZOLTAN=-L$(HOME)/bin/Zoltan-3.901/build/lib/ -lzoltan
