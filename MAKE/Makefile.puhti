@@ -1,0 +1,36 @@
+# Load the following modules:
+#module load StdEnv
+#module load gcc/11.3.0
+#module load boost
+
+# C++ compiler and flags
+CMP=mpic++
+CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -DPROFILE -DNDEBUG
+MATHFLAGS=-ffast-math -funroll-loops
+
+# Archiver
+AR = ar
+
+# Linker and flags
+LNK=mpic++
+
+###### Library include and lib paths #####
+
+# Miscellaneous files:
+INC=
+
+# Boost
+INC_BOOST=
+LIB_BOOST=-L/appl/spack/v018/install-tree/gcc-11.3.0/boost-1.79.0-eipty5/lib/ -lboost_program_options
+
+# ParGrid
+INC_PARGRID=-I$(HOME)/bin/pargrid/
+LIB_PARGRID=
+
+# VLSV file format
+INC_VLSV=-I$(HOME)/bin/vlsv/
+LIB_VLSV=-L$(HOME)/bin/vlsv/ -lvlsv
+
+# Zoltan
+INC_ZOLTAN=-I$(HOME)/bin/Zoltan-3.901/build/include/
+LIB_ZOLTAN=-L$(HOME)/bin/Zoltan-3.901/build/lib/ -lzoltan
