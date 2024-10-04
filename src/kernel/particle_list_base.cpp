@@ -125,6 +125,10 @@ void ParticleListBase::getInjector(std::string& name,std::string& configRegion) 
    configRegion = injectorParams;
 }
 
+string ParticleListBase::getInjectorType() const {
+   return injector->getType();
+}
+
 /** Get the name of particle species propagated by this particle list.
  * @return Name of propagated particle species.*/
 const std::string& ParticleListBase::getName() const {return speciesName;}

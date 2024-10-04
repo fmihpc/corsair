@@ -49,6 +49,8 @@ class ParticleInjectorBase {
    virtual bool finalize() = 0;
 
    virtual Real getMaximumSpeed();
+   virtual void setType(std::string type);
+   virtual std::string getType();
    
    /** Initialize particle injector. All inheriting classes should call base class initialize
     * function to set member variables ParticleInjectorBase::sim and ParticleInjectorBase::simClasses.
@@ -72,6 +74,7 @@ class ParticleInjectorBase {
  protected:
    Simulation* sim;               /**< Generic simulation control variables.*/
    SimulationClasses* simClasses; /**< Generic simulation classes.*/
+   std::string type;              // Injector type
 };
 
 #endif

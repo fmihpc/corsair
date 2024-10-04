@@ -57,6 +57,7 @@ class ParticleListBase {
    virtual void getBoundaryCondition(std::string& name,std::string& configRegion) const;
    ParticleInjectorBase* getInjector() const;
    virtual void getInjector(std::string& name,std::string& configRegion) const;
+   std::string getInjectorType() const;
    uint32_t* getParticleNumberArray() const;
    virtual bool getParticles(pargrid::DataID& particleDataID) const;
    ParticlePropagatorBase* getPropagator() const;

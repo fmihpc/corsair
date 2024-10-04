@@ -30,11 +30,14 @@ ParticleInjectorBase::ParticleInjectorBase() { }
 ParticleInjectorBase::~ParticleInjectorBase() { }
 
 Real ParticleInjectorBase::getMaximumSpeed() {return 0.0;}
+void ParticleInjectorBase::setType(string type) { this->type = type; }
+string ParticleInjectorBase::getType() { return this->type; }
 
 bool ParticleInjectorBase::initialize(Simulation& sim,SimulationClasses& simClasses,ConfigReader& cr,
 				      const std::string& regionName,const ParticleListBase* plist) {
    this->sim = &sim;
    this->simClasses = &simClasses;
+   this->type = "";
    return true;
 }
 
