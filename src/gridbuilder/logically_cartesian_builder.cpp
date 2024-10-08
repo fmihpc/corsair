@@ -455,6 +455,15 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    sim.dx_uniform = xUniform;
    sim.dy_uniform = yUniform;
    sim.dz_uniform = zUniform;
+   sim.x_periodic = xPeriodic;
+   sim.y_periodic = yPeriodic;
+   sim.z_periodic = zPeriodic;
+   sim.x_min = x_min;
+   sim.x_max = x_max;
+   sim.y_min = y_min;
+   sim.y_max = y_max;
+   sim.z_min = z_min;
+   sim.z_max = z_max;
    sim.x_blocks = xCells / block::WIDTH_X;
    sim.y_blocks = yCells / block::WIDTH_Y;
    sim.z_blocks = zCells / block::WIDTH_Z;

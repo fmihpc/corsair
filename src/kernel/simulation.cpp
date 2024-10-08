@@ -42,6 +42,15 @@ Simulation::Simulation(): MASTER_RANK(0) {
    dx_uniform = true;
    dy_uniform = true;
    dz_uniform = true;
+   x_periodic = false;
+   y_periodic = false;
+   z_periodic = false;
+   x_min = 0;
+   x_max = 0;
+   y_min = 0;
+   y_max = 0;
+   z_min = 0;
+   z_max = 0;
    x_crds_node = NULL;
    y_crds_node = NULL;
    z_crds_node = NULL;

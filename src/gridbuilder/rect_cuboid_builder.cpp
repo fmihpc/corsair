@@ -276,6 +276,17 @@ bool RectCuboidBuilder::initialize(Simulation& sim,SimulationClasses& simClasses
 
    sim.meshGeometry = vlsv::geometry::CARTESIAN;
    
+   sim.x_periodic = periodic_x;
+   sim.y_periodic = periodic_y;
+   sim.z_periodic = periodic_z;
+
+   sim.x_min = x_min;
+   sim.x_max = x_max;
+   sim.y_min = y_min;
+   sim.y_max = y_max;
+   sim.z_min = z_min;
+   sim.z_max = z_max;
+   
    if (success == true) simClasses.logger << "\t Initialization successful." << endl << write;
    else simClasses.logger << "\t Initialization failed." << endl << write;
    initialized = success;

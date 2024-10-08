@@ -113,6 +113,15 @@ struct Simulation {
    bool dz_uniform;                        /**< If true, cell spacing in z-direction is constant.
 					    Set to 'true' in constructor. Value may be re-set by a GridBuilder class.*/
 
+   bool x_periodic;                        /**< If true, grid is periodic in x-direction.
+					    Set to 'false' in constructor. Value may be re-set by a GridBuilder class.*/
+   bool y_periodic;                        /**< If true, grid is periodic in y-direction.
+					    Set to 'false' in constructor. Value may be re-set by a GridBuilder class.*/
+   bool z_periodic;                        /**< If true, grid is periodic in z-direction..
+					    Set to 'false' in constructor. Value may be re-set by a GridBuilder class.*/
+   Real x_min,x_max,y_min,y_max,z_min,z_max; /** Simulation domain boundary coordinates
+					    Set as zero in constructor. Value may be re-set by a GridBuilder class.*/
+
    Real* RESTRICT x_crds_node;             /**< Pointer to array containing node x-coordinates. Number of x-nodes
 					    * is equal to number of x-cells plus one.
 					    * This array is created by a GridBuilder class and deleted in destructor.*/
