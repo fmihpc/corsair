@@ -105,7 +105,7 @@ profiler.o: ${DEPS_PROFILER}
 	${CMP} ${CXXFLAGS} ${FLAGS} -c profiler.cpp ${INC_PARGRID} -I../include ${INC}
 
 randomnumber.o: ${DEPS_RANDOM}
-	${CMP} ${CXXFLAGS} -std=c++0x ${MATHFLAGS} ${FLAGS} -o randomnumber.o -c randomnumber_default.cpp ${INCS}
+	${CMP} ${CXXFLAGS} ${MATHFLAGS} ${FLAGS} -o randomnumber.o -c randomnumber_default.cpp ${INCS}
 
 restart_writer.o: ${DEPS_RESTART}
 	${CMP} ${CXXFLAGS} ${FLAGS} -c restart_writer.cpp ${INCS}
@@ -123,4 +123,4 @@ triangulated_sphere.o: ${DEPS_TRIANGULATED_SPHERE}
 	${CMP} ${CXXFLAGS} ${MATHFLAGS} ${FLAGS} -c triangulated_sphere.cpp ${INCS}
 
 ucd_mesh.o: ${DEPS_UCD_MESH}
-	${CMP} ${CXXFLAGS} -std=c++0x ${MATHFLAGS} ${FLAGS} -c ucd_mesh.cpp ${INCS}
+	${CMP} ${CXXFLAGS} ${MATHFLAGS} ${FLAGS} -c ucd_mesh.cpp ${INCS}
