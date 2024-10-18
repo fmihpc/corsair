@@ -22,7 +22,6 @@
 #include <cmath>
 
 #include "rect_cuboid_builder.h"
-#include <mpilogger.h>
 
 using namespace std;
 
@@ -287,8 +286,8 @@ bool RectCuboidBuilder::initialize(Simulation& sim,SimulationClasses& simClasses
    sim.z_min = z_min;
    sim.z_max = z_max;
    
-   if (success == true) simClasses.logger << "\t Initialization successful." << endl << write;
-   else simClasses.logger << "\t Initialization failed." << endl << write;
+   if (success == true) { simClasses.logger << "\t Initialization successful." << endl << write; }
+   else { simClasses.logger << "\t Initialization failed." << endl << write; }
    initialized = success;
    return success;
 }

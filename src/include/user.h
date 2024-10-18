@@ -24,7 +24,6 @@
 #include <configreader.h>
 #include <dataoperatorcontainer.h>
 #include <gridbuilder.h>
-#include <mpilogger.h>
 #include <simulation.h>
 #include <simulationclasses.h>
 #include <object_factories.h>

@@ -361,25 +361,25 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    cr.get(prefix+".input_units",inputUnitsString);
    
    // Process input values:
-   if (dxUniformString == "yes") xUniform = true;
-   else if (dxUniformString == "no") xUniform = false;
-   else simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".dx_uniform', should be 'yes' or 'no'." << endl << write;
-   if (dyUniformString == "yes") yUniform = true;
-   else if (dyUniformString == "no") yUniform = false;
-   else simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".dy_uniform', should be 'yes' or 'no'." << endl << write;
-   if (dzUniformString == "yes") zUniform = true;
-   else if (dzUniformString == "no") zUniform = false;
-   else simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".dz_uniform', should be 'yes' or 'no'." << endl << write;
+   if (dxUniformString == "yes") { xUniform = true; }
+   else if (dxUniformString == "no") { xUniform = false; }
+   else { simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".dx_uniform', should be 'yes' or 'no'." << endl; }
+   if (dyUniformString == "yes") { yUniform = true; }
+   else if (dyUniformString == "no") { yUniform = false; }
+   else { simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".dy_uniform', should be 'yes' or 'no'." << endl; }
+   if (dzUniformString == "yes") { zUniform = true; }
+   else if (dzUniformString == "no") { zUniform = false; }
+   else { simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".dz_uniform', should be 'yes' or 'no'." << endl; }
    
-   if (xPeriodicString == "yes") xPeriodic = true;
-   else if (xPeriodicString == "no") xPeriodic = false;
-   else simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".x_periodic', should be 'yes' or 'no'." << endl << write;
-   if (yPeriodicString == "yes") yPeriodic = true;
-   else if (yPeriodicString == "no") yPeriodic = false;
-   else simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".y_periodic', should be 'yes' or 'no'." << endl << write;
-   if (zPeriodicString == "yes") zPeriodic = true;
-   else if (zPeriodicString == "no") zPeriodic = false;
-   else simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".z_periodic', should be 'yes' or 'no'." << endl << write;
+   if (xPeriodicString == "yes") { xPeriodic = true; }
+   else if (xPeriodicString == "no") { xPeriodic = false; }
+   else { simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".x_periodic', should be 'yes' or 'no'." << endl; }
+   if (yPeriodicString == "yes") { yPeriodic = true; }
+   else if (yPeriodicString == "no") { yPeriodic = false; }
+   else { simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".y_periodic', should be 'yes' or 'no'." << endl; }
+   if (zPeriodicString == "yes") { zPeriodic = true; }
+   else if (zPeriodicString == "no") { zPeriodic = false; }
+   else { simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".z_periodic', should be 'yes' or 'no'." << endl; }
 
    double inputUnitsScale = simClasses.constants.getDistanceInSI(inputUnitsString);
    if (inputUnitsScale == numeric_limits<double>::infinity()) {
@@ -409,8 +409,7 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
       x_min *= inputUnitsScale;
       x_max *= inputUnitsScale;
    } else {
-      simClasses.logger << "\t ERROR: Unknown mesh geometry '" << geometryString << "' should be ";
-      simClasses.logger << "'cartesian', 'cylindrical', or 'spherical'." << endl << write;
+      simClasses.logger << "\t ERROR: Unknown mesh geometry '" << geometryString << "' should be 'cartesian', 'cylindrical', or 'spherical'." << endl << write;
       initialized = false;
       sim.meshGeometry = vlsv::geometry::UNKNOWN;
    }
@@ -420,18 +419,21 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    
    if (xCells % block::WIDTH_X != 0) {
       xCells += (block::WIDTH_X - xCells % block::WIDTH_X);
-      simClasses.logger << "\t WARNING: Given mesh x-size was not exactly divisible by block::WIDTH_X" << endl;
-      simClasses.logger << "\t          New x_size is " << xCells << endl << write;
+      simClasses.logger
+	<< "\t WARNING: Given mesh x-size was not exactly divisible by block::WIDTH_X" << endl
+	<< "\t          New x_size is " << xCells << endl << write;
    }
    if (yCells % block::WIDTH_Y != 0) {
       yCells += (block::WIDTH_Y - yCells % block::WIDTH_Y);
-      simClasses.logger << "\t WARNING: Given mesh y-size was not exactly divisible by block::WIDTH_Y" << endl;
-      simClasses.logger << "\t          New y_size is " << yCells << endl << write;
+      simClasses.logger
+	<< "\t WARNING: Given mesh y-size was not exactly divisible by block::WIDTH_Y" << endl
+	<< "\t          New y_size is " << yCells << endl << write;
    }
    if (zCells % block::WIDTH_Z != 0) {
       zCells += (block::WIDTH_Z - zCells % block::WIDTH_Z);
-      simClasses.logger << "\t WARNING: Given mesh z-size was not exactly divisible by block::WIDTH_Z" << endl;
-      simClasses.logger << "\t          New z_size is " << zCells << endl << write;
+      simClasses.logger
+	<< "\t WARNING: Given mesh z-size was not exactly divisible by block::WIDTH_Z" << endl
+	<< "\t          New z_size is " << zCells << endl << write;
    }
    if (x_min == DEFAULT) initialized = false;
    if (y_min == DEFAULT) initialized = false;
@@ -444,12 +446,13 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    if (z_max < z_min) initialized = false;
 
    if (initialized == false) {
-      simClasses.logger << "\t ERROR: One or more min/max coordinate limits were not found in config file" << endl;
-      simClasses.logger << "\t        or possibly min value is larger than max value" << endl;
-      simClasses.logger << "\t x min/max: " << x_min << '\t' << x_max << endl;
-      simClasses.logger << "\t y min/max: " << y_min << '\t' << y_max << endl;
-      simClasses.logger << "\t z min/max: " << z_min << '\t' << z_max << endl;
-      simClasses.logger << write;
+      simClasses.logger
+	<< "\t ERROR: One or more min/max coordinate limits were not found in config file" << endl
+	<< "\t        or possibly min value is larger than max value" << endl
+	<< "\t x min/max: " << x_min << '\t' << x_max << endl
+	<< "\t y min/max: " << y_min << '\t' << y_max << endl
+	<< "\t z min/max: " << z_min << '\t' << z_max << endl
+	<< write;
    }
    
    sim.dx_uniform = xUniform;
@@ -474,7 +477,7 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
       break;
     case Cylindrical:
       if (xPeriodic == true) {
-	 simClasses.logger << "\t WARNING: Ignoring periodic radial coordinate in cylindrical geometry." << endl << write;
+	 simClasses.logger << "\t WARNING: Ignoring periodic radial coordinate in cylindrical geometry." << endl;
 	 xPeriodic = false;
       }
       if (yPeriodic == true) {
@@ -484,16 +487,16 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
       break;
     case Spherical:
       if (xPeriodic == true) {
-	 simClasses.logger << "\t WARNING: Ignoring periodic radial coordinate in spherical geometry." << endl << write;
+	 simClasses.logger << "\t WARNING: Ignoring periodic radial coordinate in spherical geometry." << endl;
 	 xPeriodic = false;
       }
       if (yPeriodic == true) {
-	 simClasses.logger << "\t WARNING: Theta-coordinate set to periodic in spherical geometry" << endl << write;
+	 simClasses.logger << "\t WARNING: Theta-coordinate set to periodic in spherical geometry" << endl;
 	 //simClasses.logger << "\t WARNING: Ignoring periodic theta coordinate in spherical geometry." << endl << write;
 	 //yPeriodic = false;
       }
       if (zPeriodic == true) {
-	 simClasses.logger << "\t WARNING: Phi-coordinate set to periodic in spherical geometry" << endl << write;
+	 simClasses.logger << "\t WARNING: Phi-coordinate set to periodic in spherical geometry" << endl;
 	 //z_min = 0.0;
 	 //z_max = 2.0*M_PI;
       }
@@ -503,12 +506,12 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    }
    
    if (calculateCellSizes() == false) {
-      simClasses.logger << "\t WARNING: Failed to calculate cell sizes!" << endl << write;
+      simClasses.logger << "\t WARNING: Failed to calculate cell sizes!" << endl;
       initialized = false;
    }
    
    if (calculateBlockSizes() == false) {
-      simClasses.logger << "\t WARNING: Failed to calculate block sizes!" << endl << write;
+      simClasses.logger << "\t WARNING: Failed to calculate block sizes!" << endl;
       initialized = false;
    }
 
@@ -530,11 +533,11 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
 
 bool LogicallyCartesianBuilder::writeInitStatus(bool success,SimulationClasses& simClasses,const std::string& reason) {
    if (success == true) {
-      simClasses.logger << "\t Initialization successful." << endl << write;
+      simClasses.logger << "\t Initialization successful." << endl;
    } else {
-      simClasses.logger << "\t Initialization failed." << endl;
-      simClasses.logger << "\t " << reason << endl;
-      simClasses.logger << write;
+      simClasses.logger
+	<< "\t Initialization failed." << endl
+	<< "\t " << reason << endl<< write;
    }
    return success;
 }

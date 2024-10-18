@@ -27,6 +27,7 @@ using namespace std;
 MPILogger::MPILogger() {
    fileOpen = false;
    masterStream = NULL;
+   sim = NULL;
 }
 
 /** Destructor for class MPILogger. Destructor only calls MPILogger::close.*/
@@ -78,11 +79,11 @@ bool MPILogger::flush() {
       strTime.erase(lineBreak,1);
    }
 
-   // Form a new output buffer containing the process number, date 
-   // and the user-given message. Attempt to write it to file.
+   // Form a new output buffer containing the process number, date,
+   // number of simulation time step, time and the user-given
+   // message. Attempt to write it to file.
    stringstream tmp;
-   tmp << "PROC #" << mpiRank << ' ';
-   tmp << strTime << ' ' << endl;
+   tmp << "PROC #" << mpiRank << " " << strTime << ", time step = " << sim->timestep << ", time = " << sim->t << endl;
    strTime = outStream.str();
    tmp << strTime << endl;
    
@@ -103,25 +104,26 @@ bool MPILogger::flush() {
 
 /** Open a logfile for parallel writing within the given MPI communicator. 
  * All MPI processes within the given communicator must call this function simultaneously.
- * @param comm Communicator which is used for this logfile.
+ * @param sim used to get Communicator and master rank which is used for this logfile.
  * @param fname The name of the logfile.
  * @return If true, the file was opened successfully and MPILogger is ready for use.
  */
-bool MPILogger::open(MPI_Comm comm,const int& MASTER_RANK,const std::string& fname,const bool& deleteFile) {
+bool MPILogger::open(Simulation& sim,const std::string& fname,const bool& deleteFile) {
    // Store the MPI rank of this process
-   MPI_Comm_rank(comm,&mpiRank);
-   masterRank = MASTER_RANK;
+   MPI_Comm_rank(sim.comm,&mpiRank);
+   masterRank = sim.MASTER_RANK;
    bool rvalue = true;
+   this->sim = &sim;
    
    // If NDEBUG has been defined, only master process writes log messages.
    #ifndef NDEBUG
       if (deleteFile == true) MPI_File_delete(const_cast<char*>(fname.c_str()),MPI_INFO_NULL);
       const int accessMode = (MPI_MODE_WRONLY | MPI_MODE_SEQUENTIAL | MPI_MODE_CREATE);
-      if (mpiFile.open(comm,fname,MPI_INFO_NULL,accessMode,true) == false) rvalue = false;
+      if (mpiFile.open(sim.comm,fname,MPI_INFO_NULL,accessMode,true) == false) rvalue = false;
       if (mpiFile.resetPosition() == false) rvalue = false;
       if (rvalue == true) fileOpen = true;
    #else
-      if (mpiRank != MASTER_RANK) return rvalue;
+      if (mpiRank != sim.MASTER_RANK) return rvalue;
       masterStream = new fstream;
       masterStream->open(fname.c_str(), fstream::out);
       if (masterStream->good() == false) rvalue = false;

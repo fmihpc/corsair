@@ -91,7 +91,7 @@ bool DataOperatorContainer::registerOperator(DataOperator* op) {
    // Check if the operator is on exlude list. If yes, do not add it to loaded operators:
    set<string>::const_iterator it = excludedOperators.find(name);
    if (it != excludedOperators.end()) {
-      simClasses->logger << "(DATAOPERATORCONTAINER) Added DataOperator '" << name << "' to exclude list" << endl << write;
+      simClasses->logger << "(DATAOPERATORCONTAINER) Added DataOperator '" << name << "' to exclude list" << endl;
    }
    
    // Operator does not exist yet, add it 

@@ -20,7 +20,6 @@
 #include <iostream>
 
 #include "gridbuilder.h"
-#include "mpilogger.h"
 
 using namespace std;
 
@@ -168,6 +167,8 @@ bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
       simClasses.logger << "\t " << successSum << " processes failed in grid building!" << endl;
       success = false;
    }
+
+   if(success == true) { simClasses.logger << "\t Build successful." << endl; }
    
    // Flush log message and exit:
    simClasses.logger << write;

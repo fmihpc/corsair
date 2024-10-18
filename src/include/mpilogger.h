@@ -22,6 +22,7 @@
 #include <fstream>
 #include <sstream>
 #include <mpifile.h>
+#include "simulation.h"
 
 /** A class for writing log messages in parallel. MPILogger functions in 
  * the same way as standard C++ input streams, i.e. you insert values by 
@@ -51,7 +52,7 @@ class MPILogger {
    bool close();
    bool flush();
    std::stringstream& getStream() {return outStream;}
-   bool open(MPI_Comm comm,const int& MASTER_RANK,const std::string& fname,const bool& deleteFile=true);
+   bool open(Simulation& sim,const std::string& fname,const bool& deleteFile=true);
    bool print(const std::string& s);
    std::string str() {return outStream.str();}
 
@@ -70,6 +71,7 @@ class MPILogger {
    int masterRank;                      /**< MPI rank of the master process.*/
    std::stringstream outStream;         /**< Output buffer.*/
    std::fstream* masterStream;          /**< Output stream for master process only.*/
+   Simulation* sim;                     /**< Pointer to generic simulation variables.*/
 };
 
 /** Stream insertion operator for inserting values to the input stream.

@@ -531,6 +531,7 @@ bool RestartBuilder::initialize(Simulation& sim,SimulationClasses& simClasses,Co
 	 meshName = attribsOut["name"];
       }
    }
+   if(initialized == true) {simClasses.logger << "\t Initialization successful." << endl; }
    simClasses.logger << write;
    return initialized;
 }

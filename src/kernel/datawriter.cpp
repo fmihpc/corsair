@@ -43,8 +43,7 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    #if PROFILE_LEVEL > 0
       profile::start("File Open",fileOpenID);
    #endif
-   simClasses.logger << "(DATAWRITER) Starting to write simulation data time step " << sim.timestep;
-   simClasses.logger << " time " << sim.t << endl;
+   simClasses.logger << "(DATAWRITER) Starting to write simulation data" << endl;
 
    // Create name for output file:
    stringstream ss;
@@ -167,8 +166,10 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
       datarate /= 1.0e3;
    }
    
-   simClasses.logger << "\t Successfully wrote " << bytesWritten/divider << ' ' << units << " in " << t_total << " seconds, ";
-   simClasses.logger << "throughput " << datarate << ' ' << datarateUnits << "." << endl << write;
+   simClasses.logger
+     << "\t wrote " << bytesWritten/divider << ' ' << units << " in " << t_total << " seconds, " << "throughput " << datarate << ' ' << datarateUnits << "." << endl << write;
+
+   if(successSum < 1) { simClasses.logger << "\t Writing successful." << endl; }
    
    #if PROFILE_LEVEL > 0
       profile::stop(); // datawriter finalize

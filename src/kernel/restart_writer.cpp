@@ -88,8 +88,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
       profile::start("Write restart",writeRestartID);
    #endif
 
-   simClasses.logger << "(RESTART WRITER) Starting to write restart data time step " << sim.timestep;
-   simClasses.logger << " time " << sim.t << endl;
+   simClasses.logger << "(RESTART WRITER) Starting to write restart data" << endl;
    removeOldRestartFiles(sim);
    
    // Name of the simulation mesh:
