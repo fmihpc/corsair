@@ -527,11 +527,12 @@ int main(int argn,char* args[]) {
 	 if (objectWrapper.sim.timestep < dataSaveFirstTimesteps) {
 	    objectWrapper.sim.atDataSaveStep = true;
 	 }
+	 if(objectWrapper.sim.atDataSaveStep == true) { objectWrapper.simClasses.logger << write << "(MAIN) At data save step" << write; }
          
          // Check if restart file should be written:
          if (objectWrapper.sim.restartWriteInterval > 0 && objectWrapper.sim.timestep != objectWrapper.sim.restartTimestep) {
             if (objectWrapper.sim.timestep % objectWrapper.sim.restartWriteInterval == 0 || objectWrapper.sim.timestep == 0) {
-               objectWrapper.simClasses.logger << "(MAIN) Writing restart file..." << endl;
+               objectWrapper.simClasses.logger << write << "(MAIN) Writing restart file..." << endl << write;
                if (writeRestart(objectWrapper.sim,objectWrapper.simClasses) == false) {
                   objectWrapper.simClasses.logger << "(MAIN) Failed to write restart file!" << endl << write;
                }
@@ -623,7 +624,7 @@ int main(int argn,char* args[]) {
                      }
                   }
                }
-               objectWrapper.sim.countPropagTime   = false;
+               objectWrapper.sim.countPropagTime = false;
 	       objectWrapper.simClasses.logger << endl;
             }
          }

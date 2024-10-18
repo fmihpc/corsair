@@ -43,7 +43,7 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    #if PROFILE_LEVEL > 0
       profile::start("File Open",fileOpenID);
    #endif
-   simClasses.logger << endl << "(DATAWRITER) Starting to write simulation data" << endl;
+   simClasses.logger << write << endl << "(DATAWRITER) Starting to write simulation data" << endl << write;
 
    // Create name for output file:
    stringstream ss;
