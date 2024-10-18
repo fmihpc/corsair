@@ -167,7 +167,7 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    }
    
    simClasses.logger
-     << "\t wrote " << bytesWritten/divider << ' ' << units << " in " << t_total << " seconds, " << "throughput " << datarate << ' ' << datarateUnits << "." << endl << write;
+     << "\t wrote " << bytesWritten/divider << ' ' << units << " in " << t_total << " seconds, " << "throughput " << datarate << ' ' << datarateUnits << "." << endl;
 
    if(successSum < 1) { simClasses.logger << "\t Writing successful." << endl; }
    
