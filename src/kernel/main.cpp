@@ -576,7 +576,7 @@ int main(int argn,char* args[]) {
                   profile::start("corsair/repartition check",profileRepartitionID);
                #endif
 	       
-               objectWrapper.simClasses.logger << "(MAIN) Testing for repartitioning" << endl;
+               objectWrapper.simClasses.logger << endl << "(MAIN) Testing for repartitioning" << endl;
 
                // Evaluate computational load:
                corsair::ComputationalLoad compuLoad;
@@ -624,6 +624,7 @@ int main(int argn,char* args[]) {
                   }
                }
                objectWrapper.sim.countPropagTime   = false;
+	       objectWrapper.simClasses.logger << endl;
             }
          }
       }

@@ -88,7 +88,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
       profile::start("Write restart",writeRestartID);
    #endif
 
-   simClasses.logger << "(RESTART WRITER) Starting to write restart data" << endl;
+   simClasses.logger << endl << "(RESTART WRITER) Starting to write restart data" << endl;
    removeOldRestartFiles(sim);
    
    // Name of the simulation mesh:
@@ -261,6 +261,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
    } else {
       simClasses.logger << "\t Restart file written successfully" << endl;
    }
+   simClasses.logger << endl;
    
    // Flush log file message and exit:
    simClasses.logger << write;
