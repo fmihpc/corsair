@@ -261,8 +261,6 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
    } else {
       simClasses.logger << "\t Restart file written successfully" << endl;
    }
-   simClasses.logger << endl;
-   
    // Flush log file message and exit:
    simClasses.logger << write;
    return exitStatus(success);

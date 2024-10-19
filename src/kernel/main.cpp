@@ -143,7 +143,7 @@ int main(int argn,char* args[]) {
    #endif
 
    // Open a log file:
-   objectWrapper.simClasses.logger.open(objectWrapper.sim,logFileName,true);
+   objectWrapper.simClasses.logger.open(objectWrapper.sim.comm,objectWrapper.sim.MASTER_RANK,logFileName,true);
    objectWrapper.simClasses.logger << "(MAIN) Corsair starting initialisation." << endl;
    objectWrapper.simClasses.logger << "Using " << objectWrapper.sim.mpiProcesses << " MPI processes and ";
    #ifndef _OPENMP
@@ -450,7 +450,7 @@ int main(int argn,char* args[]) {
    // Check that initialisation succeeded. If not, exit program (well we just skip 
    // the propagation loop for clean exit):
    if (initialized == true) {
-      objectWrapper.simClasses.logger << write << "(MAIN) Initialization completed." << endl << write;
+      objectWrapper.simClasses.logger << "(MAIN) Initialization completed." << endl << write;
    } else {
       objectWrapper.simClasses.logger << "(MAIN) Initialization failed, exiting!" << endl << write;
       if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) {
@@ -502,7 +502,7 @@ int main(int argn,char* args[]) {
       if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) 
         loads << "#step load(min) load(max) load(avg) imbalance_ratio" << endl;
       
-      objectWrapper.simClasses.logger << write << "(MAIN) Starting to run simulation" << endl << write;
+      objectWrapper.simClasses.logger << "(MAIN) Starting to run simulation" << endl << write;
       while (continueSimulation(objectWrapper.sim) == true) {
          // If partitioning is checked on this time step, set objectWrapper.sim.countPropagTime to true:
          if (objectWrapper.sim.repartitionCheckInterval > 0) {
@@ -527,12 +527,14 @@ int main(int argn,char* args[]) {
 	 if (objectWrapper.sim.timestep < dataSaveFirstTimesteps) {
 	    objectWrapper.sim.atDataSaveStep = true;
 	 }
-	 if(objectWrapper.sim.atDataSaveStep == true) { objectWrapper.simClasses.logger << write << "(MAIN) At data save step" << write; }
+	 if(objectWrapper.sim.atDataSaveStep == true) {
+	    objectWrapper.simClasses.logger << "(MAIN) At data save step (time step = " << objectWrapper.sim.timestep << ", time = " << objectWrapper.sim.t << ")" << endl << write;
+	 }
          
          // Check if restart file should be written:
          if (objectWrapper.sim.restartWriteInterval > 0 && objectWrapper.sim.timestep != objectWrapper.sim.restartTimestep) {
             if (objectWrapper.sim.timestep % objectWrapper.sim.restartWriteInterval == 0 || objectWrapper.sim.timestep == 0) {
-               objectWrapper.simClasses.logger << write << "(MAIN) Writing restart file..." << endl << write;
+               objectWrapper.simClasses.logger << "(MAIN) Writing restart file (time step = " << objectWrapper.sim.timestep << ", time = " << objectWrapper.sim.t << ")" << endl;
                if (writeRestart(objectWrapper.sim,objectWrapper.simClasses) == false) {
                   objectWrapper.simClasses.logger << "(MAIN) Failed to write restart file!" << endl << write;
                }
@@ -556,7 +558,11 @@ int main(int argn,char* args[]) {
 	 
          ++objectWrapper.sim.timestep;
          objectWrapper.sim.t += objectWrapper.sim.dt;
-         
+
+	 if(continueSimulation(objectWrapper.sim) == false) {
+	    objectWrapper.simClasses.logger << "(MAIN) At final time step (time step = " << objectWrapper.sim.timestep << ", time = " << objectWrapper.sim.t << ")" << endl << write;
+	 }
+	 
          if (objectWrapper.sim.atDataSaveStep == true || continueSimulation(objectWrapper.sim) == false) {
             #if PROFILE_LEVEL > 0
                profile::start("corsair/save",profileSaveID);
@@ -577,7 +583,7 @@ int main(int argn,char* args[]) {
                   profile::start("corsair/repartition check",profileRepartitionID);
                #endif
 	       
-               objectWrapper.simClasses.logger << endl << "(MAIN) Testing for repartitioning" << endl;
+               objectWrapper.simClasses.logger << endl << "(MAIN) Testing for repartitioning (time step = " << objectWrapper.sim.timestep << ", time = " << objectWrapper.sim.t << ")" << endl;
 
                // Evaluate computational load:
                corsair::ComputationalLoad compuLoad;
@@ -624,6 +630,9 @@ int main(int argn,char* args[]) {
                      }
                   }
                }
+	       else {
+		  objectWrapper.simClasses.logger << "\t No repartitioning needed" << endl;
+	       }
                objectWrapper.sim.countPropagTime = false;
 	       objectWrapper.simClasses.logger << endl;
             }
