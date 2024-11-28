@@ -29,4 +29,3 @@
 typedef double Real;
 
 #endif
- 

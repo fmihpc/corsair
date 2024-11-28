@@ -27,10 +27,9 @@ class RandomNumber {
    ~RandomNumber();
    bool finalize();
    bool initialize(int seed);
-
    Real gaussian();
    Real uniform();
-   
+   Real uniformPM();
  private:
    bool initialized;
    int seed;

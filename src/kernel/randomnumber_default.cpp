@@ -29,7 +29,8 @@ namespace corsair {
    random_device rd;
    mt19937 generator(rd());                          /**< Mersenne Twister 19937 random number generator.*/
    normal_distribution<Real> normal(0.0,1.0);        /**< Gaussian random number distribution with zero mean and unit variance.*/
-   uniform_real_distribution<Real> uniform(0.0,1.0); /**< Uniform random number distribution in interval 0.0,1.0.*/
+   uniform_real_distribution<Real> uniform(0.0,1.0); /**< Uniform random number distribution in interval [0.0,1.0)*/
+   uniform_real_distribution<Real> uniformPM(-1.0,1.0); /**< Uniform random number distribution in interval [-1.0,1.0)*/
 }
 
 /** Class default constructor. Sets RandomNumber::initialized to false.*/
@@ -58,16 +59,20 @@ Real RandomNumber::gaussian() {
  * @param seed Seed value.
  * @return Returns value true if initialization succeeded.*/
 bool RandomNumber::initialize(int seed) {
-   if (initialized == true) return true;
-   
+   if (initialized == true) { return true; }
    corsair::generator.seed(abs(seed));
-   
    initialized = true;
    return initialized;
 }
 
-/** Return a uniform random number in interval [0,1].
+/** Return a uniform random number in interval [0,1)
  * @return Generated random number.*/
 Real RandomNumber::uniform() {
    return corsair::uniform(corsair::generator);
+}
+
+/** Return a uniform random number in interval [-1,1)
+ * @return Generated random number.*/
+Real RandomNumber::uniformPM() {
+   return corsair::uniformPM(corsair::generator);
 }
