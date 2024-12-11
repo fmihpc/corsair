@@ -403,7 +403,7 @@ int main(int argn,char* args[]) {
    objectWrapper.configReader.get("Simulation.data_save_initial_state",dataSaveInitial);
 
    // Read if output files should be saved during first N timesteps
-   int dataSaveFirstTimesteps = 0;
+   uint32_t dataSaveFirstTimesteps = 0;
    objectWrapper.configReader.get("Simulation.data_save_during_first_timesteps",dataSaveFirstTimesteps);
 
    // Read if mesh should be written to every VLSV file:
