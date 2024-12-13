@@ -30,7 +30,7 @@ clean:
 	${MAKE} clean "ARCH=${ARCH}" "SIM=${SIM}" -C src
 
 simclean:
-	rm -rf *~ corsair_* *.vlsv *.silo logfile.txt
+	rm -rf *~ corsair_${SIM} *.vlsv *.silo logfile.txt
 	${MAKE} simclean "ARCH=${ARCH}" "SIM=${SIM}" -C src
 
 dist:
