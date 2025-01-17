@@ -23,6 +23,9 @@
 
 using namespace std;
 
+// remove this definition if you want to get log messages from all processes (can produce very long log files)
+#define NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES
+
 /** Default constructor for class MPILogger.*/
 MPILogger::MPILogger() {
    fileOpen = false;
@@ -45,7 +48,7 @@ bool MPILogger::close() {
    if (fileOpen == false) return false;
    #ifndef NDEBUG
       bool success = mpiFile.close();
-   #else 
+   #else
       bool success = true;
       masterStream->close();
       delete masterStream;
@@ -64,15 +67,15 @@ bool MPILogger::close() {
 bool MPILogger::flush() {
    if (fileOpen == false) return false;
    bool success = true;
-   #ifdef NDEBUG
-      if (mpiRank != masterRank) return true;
+   #ifdef NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES
+      if (mpiRank != masterRank) { return true; }
    #endif
-   
+
    // Get the current time. Remove the line break from 
    // the string output given by ctime.
    const time_t rawTime = time(NULL);
    string strTime = ctime(&rawTime);
-   
+
    const size_t lineBreak = strTime.find('\n');
    if (lineBreak != string::npos) {
       strTime.erase(lineBreak,1);
@@ -84,7 +87,15 @@ bool MPILogger::flush() {
    tmp << "PROC #" << mpiRank << " " << strTime << endl;
    strTime = outStream.str();
    tmp << strTime << endl;
-   
+
+#ifndef NDEBUG
+#ifndef NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES
+   tmp << "(MPILOGGER) NDEBUG and NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES not defined, writing main log output from all processes (can produce a very long log file)" << endl << endl;
+#else
+   tmp << "(MPILOGGER) NDEBUG not defined but NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES defined, writing main log output only from master. Undefine NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES if need log output from all processes." << endl << endl;
+#endif
+#endif
+
    #ifndef NDEBUG
       mpiFile << tmp.str();
 
@@ -130,11 +141,11 @@ bool MPILogger::open(MPI_Comm comm,const int& MASTER_RANK,const std::string& fna
 }
 
 bool MPILogger::print(const std::string& s) {
-   #ifndef NDEBUG
+   #ifndef NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES
       mpiFile << s;
-      if (mpiFile.getCount<size_t>() != s.size()) return false;
+      if (mpiFile.getCount<size_t>() != s.size()) { return false; }
    #else
-      if (mpiRank != masterRank) return true;
+      if (mpiRank != masterRank) { return true; }
       (*masterStream) << s;
    #endif
    return true;
