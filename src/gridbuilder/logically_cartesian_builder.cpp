@@ -53,7 +53,7 @@ bool LogicallyCartesianBuilder::calculateBlockSizes() {
    if (sim->dx_cell == NULL) return false;
    if (sim->dy_cell == NULL) return false;
    if (sim->dz_cell == NULL) return false;
-   
+
    sim->dx_block = new Real[sim->x_blocks];
    for (unsigned int i_block=0; i_block<sim->x_blocks; ++i_block) {
       sim->dx_block[i_block] = 0.0;
@@ -69,7 +69,7 @@ bool LogicallyCartesianBuilder::calculateBlockSizes() {
 	 sim->dy_block[j_block] += sim->dy_cell[j_block*block::WIDTH_Y+j_cell];
       }
    }
-   
+
    sim->dz_block = new Real[sim->z_blocks];
    for (unsigned int k_block=0; k_block<sim->z_blocks; ++k_block) {
       sim->dz_block[k_block] = 0.0;
@@ -77,7 +77,7 @@ bool LogicallyCartesianBuilder::calculateBlockSizes() {
 	 sim->dz_block[k_block] += sim->dz_cell[k_block*block::WIDTH_Z+k_cell];
       }
    }
-   
+
    return true;
 }
 
@@ -121,7 +121,7 @@ bool LogicallyCartesianBuilder::calculateCellSizes() {
 	 for (builder::ID i=0; i<zCells; ++i) sim->dz_cell[i] = dz0 + i*dz;
       }
    }
-   
+
    return true;
 }
 
@@ -130,7 +130,7 @@ builder::ID LogicallyCartesianBuilder::calculateNeighbourID(builder::ID I,builde
    builder::ID i_out = I + i;
    builder::ID j_out = J + j;
    builder::ID k_out = K + k;
-   
+
    // Check that neighbour i-index is within the simulation volume:
    if (i_out > sim->x_blocks-1) {
       if (xPeriodic == false) {
@@ -141,7 +141,7 @@ builder::ID LogicallyCartesianBuilder::calculateNeighbourID(builder::ID I,builde
 	 else i_out -= sim->x_blocks;
       }
    }
-   
+
    // Check that neighbour j-index is within the simulation volume:
    if (j_out > sim->y_blocks-1) {
       if (yPeriodic == false) {
@@ -152,7 +152,7 @@ builder::ID LogicallyCartesianBuilder::calculateNeighbourID(builder::ID I,builde
 	 else j_out -= sim->y_blocks;
       }
    }
-   
+
    // Check that neighbour k-index is within the simulation volume:
    if (k_out > sim->z_blocks-1) {
       if (zPeriodic == false) {
@@ -202,7 +202,7 @@ bool LogicallyCartesianBuilder::defineParameters(ConfigReader& cr) {
    cr.add(prefix+".x_periodic","Is mesh periodic in x-direction (yes/no) ?",string("no"));
    cr.add(prefix+".y_periodic","Is mesh periodic in y-direction (yes/no) ?",string("no"));
    cr.add(prefix+".z_periodic","Is mesh periodic in z-direction (yes/no) ?",string("no"));
-   
+
    cr.add(prefix+".x_units","Units of measure for x-coordinate (string).",string(""));
    cr.add(prefix+".y_units","Units of measure for y-coordinate (string).",string(""));
    cr.add(prefix+".z_units","Units of measure for z-coordinate (string).",string(""));
@@ -211,9 +211,8 @@ bool LogicallyCartesianBuilder::defineParameters(ConfigReader& cr) {
    cr.add(prefix+".z_label","Label for z-coordinate (string).","z-coordinate");
 
    cr.add(prefix+".input_units","Units in which x_min etc. are given, defaults to meters. Accepted m/km/AU/RE/RS/RV (string).",string("m"));
-   
    cr.add(prefix+".geometry","Geometry of mesh (cartesian/cylindrical/spherical)",string("cartesian"));
-   
+   cr.add(prefix+".force_cubic_cells","Force Cartesian cells to be cubic by automatically setting coordinate limits of axes with only one cell (yes/no)",string("no"));
    return true;
 }
 
@@ -230,28 +229,28 @@ bool LogicallyCartesianBuilder::getCellIndices(unsigned int N_cells,const builde
    for (builder::ID c=0; c<N_cells; ++c) {
       const builder::ID cellID = globalIDs[c];
       calculateCellIndices(cellID,i,j,k);
-      
+
       indices[c*3+0] = i;
       indices[c*3+1] = j;
       indices[c*3+2] = k;
    }
-   
+
    return initialized;
 }
 
 bool LogicallyCartesianBuilder::getCellInfo(builder::ID cellOffsetStart,builder::ID cellOffsetEnd,builder::ID* cellIDs,unsigned char* N_neighbours) {
    if (initialized == false) return initialized;
-   
+
    builder::ID i,j,k;
    const builder::ID N_cells = cellOffsetEnd-cellOffsetStart;
-   
+
    for (builder::ID cell=0; cell<N_cells; ++cell) {
       builder::ID cellID = cellOffsetStart + cell;
       calculateCellIndices(cellID,i,j,k);
       cellIDs[cell]      = cellID;
       N_neighbours[cell] = countNeighbours(i,j,k);
    }
-   
+
    return true;
 }
 
@@ -265,44 +264,44 @@ bool LogicallyCartesianBuilder::getCellNeighbours(builder::ID cellOffsetStart,bu
    for (builder::ID c=0; c<N_cells; ++c) {
       const builder::ID cellID = cellIDs[c];
       calculateCellIndices(cellID,I,J,K);
-      
+
       // Add neighbour IDs that exist in a 3x3x3 cube centered at this cell:
       for (int i=-1; i<2; ++i) for (int j=-1; j<2; ++j) for (int k=-1; k<2; ++k) {
 	 if (i == 0 && (j == 0 && k == 0)) continue;
 	 builder::ID nbrID     = calculateNeighbourID(I,J,K,i,j,k);
 	 if (nbrID == numeric_limits<builder::ID>::max()) continue;
-	 
+
 	 const unsigned char nbrTypeID = calculateNeighbourTypeID(i,j,k);
 	 neighbourIDs[counter]     = nbrID;
 	 neighbourTypeIDs[counter] = nbrTypeID;
 	 ++counter;
       }
-   }      
-   
+   }
+
    return true;
 }
 
 bool LogicallyCartesianBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cellOffsetEnd,builder::ID* globalIDs,double* coordinates) {
    if (initialized == false) return initialized;
-   
+
    builder::ID i_block,j_block,k_block;
    const builder::ID N_blocks = cellOffsetEnd-cellOffsetStart;
-   
+
    for (builder::ID block=0; block<N_blocks; ++block) {
       builder::ID blockGID = globalIDs[block];
       calculateCellIndices(blockGID,i_block,j_block,k_block);
-      
+
       coordinates[3*block+0] = sim->x_crds_node[i_block*block::WIDTH_X + 0];
       coordinates[3*block+1] = sim->y_crds_node[j_block*block::WIDTH_Y + 0];
       coordinates[3*block+2] = sim->z_crds_node[k_block*block::WIDTH_Z + 0];
    }
-   
+
    return true;
 }
 
 bool LogicallyCartesianBuilder::getMeshBoundingBox(Real& x_min,Real& y_min,Real& z_min,Real& dx0,Real& dy0,Real& dz0) {
    if (initialized == false) return initialized;
-   
+
    // TEST
    x_min = this->x_min;
    y_min = this->y_min;
@@ -311,7 +310,7 @@ bool LogicallyCartesianBuilder::getMeshBoundingBox(Real& x_min,Real& y_min,Real&
    dy0 = sim->dy_cell[0];
    dz0 = sim->dz_cell[0];
    // END TEST
-   
+
    return initialized;
 }
 
@@ -324,18 +323,18 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    initialized = true;
    simClasses.logger << "(LC BUILDER) Starting to initialize" << endl;
    this->sim = &sim;
-   
+
    // Insert config file parameters to ConfigReader:
    if (defineParameters(cr) == false) {
       initialized = false;
       return writeInitStatus(initialized,simClasses,"Failed to add parameters to config file reader");
    }
-   
+
    // Parse parameter values:
    cr.parse();
    string xPeriodicString,yPeriodicString,zPeriodicString;
    string dxUniformString,dyUniformString,dzUniformString;
-   string geometryString,inputUnitsString;
+   string geometryString,inputUnitsString,forceCubicCellsString;
    cr.get(prefix+".dx_uniform",dxUniformString);
    cr.get(prefix+".dy_uniform",dyUniformString);
    cr.get(prefix+".dz_uniform",dzUniformString);
@@ -359,7 +358,8 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    cr.get(prefix+".z_units",zUnits);
    cr.get(prefix+".geometry",geometryString);
    cr.get(prefix+".input_units",inputUnitsString);
-   
+   cr.get(prefix+".force_cubic_cells",forceCubicCellsString);
+
    // Process input values:
    if (dxUniformString == "yes") { xUniform = true; }
    else if (dxUniformString == "no") { xUniform = false; }
@@ -370,7 +370,7 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    if (dzUniformString == "yes") { zUniform = true; }
    else if (dzUniformString == "no") { zUniform = false; }
    else { simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".dz_uniform', should be 'yes' or 'no'." << endl; }
-   
+
    if (xPeriodicString == "yes") { xPeriodic = true; }
    else if (xPeriodicString == "no") { xPeriodic = false; }
    else { simClasses.logger << "\t WARNING: Unknown value in parameter '" << prefix+".x_periodic', should be 'yes' or 'no'." << endl; }
@@ -386,7 +386,7 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
       simClasses.logger << "\t ERROR: Invalid input units '" << inputUnitsString << "' given in confile file." << endl << write;
       initialized = false;
    }
-   
+
    if (geometryString == "cartesian") {
       geometry = Cartesian;
       sim.meshGeometry = vlsv::geometry::CARTESIAN;
@@ -413,10 +413,58 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
       initialized = false;
       sim.meshGeometry = vlsv::geometry::UNKNOWN;
    }
-   
+
+   // try to force cubic cells in Cartesian geometry
+   if(forceCubicCellsString == "yes") {
+      if(geometryString != "cartesian") {
+	 simClasses.logger << "\t ERROR: force_cubic_cells = yes allowed only with geometry = cartesian" << endl << write;
+	 initialized = false;
+	 goto forceCubicCellsFailed;
+      }
+      if(dxUniformString != "yes" || dyUniformString != "yes" || dzUniformString != "yes") {
+	 simClasses.logger << "\t ERROR: force_cubic_cells = yes allowed only with dx_uniform = dy_uniform = dz_uniform = yes" << endl << write;
+	 initialized = false;
+	 goto forceCubicCellsFailed;
+      }
+      // find out cell size of the first axis with more than one cell or otherwise use x axis
+      Real dc = -1.0;
+      if(xCells > 1)      { dc = (x_max - x_min)/xCells; }
+      else if(yCells > 1) { dc = (y_max - y_min)/yCells; }
+      else if(zCells > 1) { dc = (z_max - z_min)/zCells; }
+      else                { dc = (x_max - x_min)/xCells; }
+      // reset coordinate limits of single cell axes to [-dc/2,dc/2]
+      const Real dcHalf = dc/2.0;
+      if(dc > 0) {
+	 if(xCells == 1) {
+	    x_min = -dcHalf;
+	    x_max = dcHalf;
+	    simClasses.logger << "\t forcing Cartesian cubic cells: resetting coordinate limits of a single cell axis: x (x_min = " << x_min << ", x_max = " << x_max << ")" << endl;
+	 }
+	 if(yCells == 1) {
+	    y_min = -dcHalf;
+	    y_max = dcHalf;
+	    simClasses.logger << "\t forcing Cartesian cubic cells: resetting coordinate limits of a single cell axis: y (y_min = " << y_min << ", y_max = " << y_max << ")" << endl;
+	 }
+	 if(zCells == 1) {
+	    z_min = -dcHalf;
+	    z_max = dcHalf;
+	    simClasses.logger << "\t forcing Cartesian cubic cells: restting coordinate limits of a single cell axis: z (z_min = " << z_min << ", z_max = " << z_max << ")" << endl;
+	 }
+      }
+      // check resulting cell sizes
+      const Real dx = (x_max - x_min)/xCells;
+      const Real dy = (y_max - y_min)/yCells;
+      const Real dz = (z_max - z_min)/zCells;
+      if(dx != dy || dx != dz || dy != dz) {
+	 simClasses.logger << "\t ERROR: failed forcing Cartesian cells to be cubic (force_cubic_cells = yes), (dx,dy,dz) = (" << dx << "," << dy << "," << dz << ")" << endl << write;
+	 initialized = false;
+	 goto forceCubicCellsFailed;
+      }
+   }
+forceCubicCellsFailed:
+
    // Check input parameters for sanity:
    const Real DEFAULT = numeric_limits<Real>::infinity();
-   
    if (xCells % block::WIDTH_X != 0) {
       xCells += (block::WIDTH_X - xCells % block::WIDTH_X);
       simClasses.logger
@@ -435,15 +483,15 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
 	<< "\t WARNING: Given mesh z-size was not exactly divisible by block::WIDTH_Z" << endl
 	<< "\t          New z_size is " << zCells << endl << write;
    }
-   if (x_min == DEFAULT) initialized = false;
-   if (y_min == DEFAULT) initialized = false;
-   if (z_min == DEFAULT) initialized = false;
-   if (x_max == DEFAULT) initialized = false;
-   if (y_max == DEFAULT) initialized = false;
-   if (z_max == DEFAULT) initialized = false;
-   if (x_max < x_min) initialized = false;
-   if (y_max < y_min) initialized = false;
-   if (z_max < z_min) initialized = false;
+   if (x_min == DEFAULT) { initialized = false; }
+   if (y_min == DEFAULT) { initialized = false; }
+   if (z_min == DEFAULT) { initialized = false; }
+   if (x_max == DEFAULT) { initialized = false; }
+   if (y_max == DEFAULT) { initialized = false; }
+   if (z_max == DEFAULT) { initialized = false; }
+   if (x_max < x_min) { initialized = false; }
+   if (y_max < y_min) { initialized = false; }
+   if (z_max < z_min) { initialized = false; }
 
    if (initialized == false) {
       simClasses.logger
@@ -454,7 +502,7 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
 	<< "\t z min/max: " << z_min << '\t' << z_max << endl
 	<< write;
    }
-   
+
    sim.dx_uniform = xUniform;
    sim.dy_uniform = yUniform;
    sim.dz_uniform = zUniform;
@@ -504,12 +552,12 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
     default:
       break;
    }
-   
+
    if (calculateCellSizes() == false) {
       simClasses.logger << "\t WARNING: Failed to calculate cell sizes!" << endl;
       initialized = false;
    }
-   
+
    if (calculateBlockSizes() == false) {
       simClasses.logger << "\t WARNING: Failed to calculate block sizes!" << endl;
       initialized = false;
@@ -527,7 +575,7 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    sim.z_crds_node[0] = z_min;
    for (builder::ID i=1; i<zCells; ++i) sim.z_crds_node[i] = sim.z_crds_node[i-1] + sim.dz_cell[i-1];
    sim.z_crds_node[zCells] = z_max;
-   
+
    return writeInitStatus(initialized,simClasses,"");
 }
 
@@ -544,7 +592,7 @@ bool LogicallyCartesianBuilder::writeInitStatus(bool success,SimulationClasses& 
 
 bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const std::string& meshName,bool writeMesh) {
    bool success = true;
-   
+
    // XML tag called MESH must appear on each VLSV file even if the mesh is not written out:
    map<string,string> attributes;
    if (writeMesh == false) {
@@ -556,11 +604,11 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
       ss << (pargrid::MPI_processID)sim.mpiProcesses;
       attributes["domains"] = ss.str();
       if (simClasses.vlsv.writeArray("MESH",attributes,0,1,array) == false) success = false;
-      
+
       // If mesh is read from another file we can exit now:
       return success;
    }
-   
+
    // Create ParGrid array that contains boundary cell local IDs and exchange data with neighbours:
    pargrid::DataID lidArrayID = simClasses.pargrid.addUserData<pargrid::CellID>("localIDs",1);
    if (lidArrayID == simClasses.pargrid.invalidDataID()) {
@@ -574,7 +622,7 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
 	 success = false;
       }
    }
-   
+
    // Write block local IDs to all boundary blocks:
    pargrid::CellID* lidArray = NULL;
    if (success == true) {
@@ -585,7 +633,7 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
 	 lidArray[blockLID] = blockLID;
       }
    }
-   
+
    // Exchange block local IDs with neighbor processes:
    if (success == true) {
       if (simClasses.pargrid.startNeighbourExchange(pargrid::DEFAULT_STENCIL,lidArrayID) == false) {
@@ -593,7 +641,7 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
 	 success = false;
       }
    }
-   
+
    // Write mesh bounding box and node coordinates (master process only):
    attributes.clear();
    attributes["mesh"] = meshName;
@@ -606,14 +654,14 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
       bbox[4] = block::WIDTH_Y; // Number of cells in each block in y-direction.
       bbox[5] = block::WIDTH_Z; // Number of cells in each block in z-direction.
       if (simClasses.vlsv.writeArray("MESH_BBOX",attributes,6,1,bbox) == false) success = false;
-      
+
       if (simClasses.vlsv.writeArray("MESH_NODE_CRDS_X",attributes,xCells+1,1,sim.x_crds_node) == false) success = false;
       if (simClasses.vlsv.writeArray("MESH_NODE_CRDS_Y",attributes,yCells+1,1,sim.y_crds_node) == false) success = false;
       if (simClasses.vlsv.writeArray("MESH_NODE_CRDS_Z",attributes,zCells+1,1,sim.z_crds_node) == false) success = false;
    } else {
       unsigned int* ptr = NULL;
       if (simClasses.vlsv.writeArray("MESH_BBOX",attributes,0,1,ptr) == false) success = false;
-      
+
       Real* crd = NULL;
       if (simClasses.vlsv.writeArray("MESH_NODE_CRDS_X",attributes,0,1,crd) == false) success = false;
       if (simClasses.vlsv.writeArray("MESH_NODE_CRDS_Y",attributes,0,1,crd) == false) success = false;
@@ -622,10 +670,10 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
    if (success == false) {
       simClasses.logger << "(GRIDBUILDER) ERROR: Failed to write mesh bounding box information" << endl << write;
    }
-   
+
    // Count total number of blocks (local+remote) in the domain:
    const vector<pargrid::CellID>& globalIDs = simClasses.pargrid.getGlobalIDs();
-   
+
    if (success == true) {
       // Flag periodic neighbors so that plugin knows to exclude them:
       const vector<pargrid::MPI_processID>& hosts = simClasses.pargrid.getHosts();
@@ -634,7 +682,7 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
       validity.resize(simClasses.pargrid.getNumberOfAllCells());
       for (pargrid::CellID block=simClasses.pargrid.getNumberOfLocalCells(); block<simClasses.pargrid.getNumberOfAllCells(); ++block)
 	validity[block] = false;
-      
+
       for (size_t block=0; block<boundaryBlocks.size(); ++block) {
 	 // Calculate local block's (i,j,k) indices:
 	 const pargrid::CellID localBlockLID = boundaryBlocks[block];
@@ -642,24 +690,24 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
 
 	 builder::ID i_block,j_block,k_block;
 	 calculateCellIndices(localBlockGID,i_block,j_block,k_block);
-	 
+
 	 // Get local block's neighbors:
 	 const pargrid::CellID* const neighborLIDs = simClasses.pargrid.getCellNeighbourIDs(localBlockLID);
 	 for (size_t n=0; n<pargrid::N_neighbours; ++n) {
 	    // Get neighbor local ID:
 	    const pargrid::CellID neighborLID = neighborLIDs[n];
-	    
+
 	    // Skip non-existing neighbors:
 	    if (neighborLID == pargrid::INVALID_CELLID) continue;
-	    
+
 	    // Skip neighbors that are local to this process:
 	    if (hosts[neighborLID] == sim.mpiRank) continue;
-	    
+
 	    // Calculate neighbor block's (i,j,k) indices:
 	    const pargrid::CellID neighborGID = simClasses.pargrid.getGlobalIDs()[neighborLID];
 	    builder::ID i_nbr,j_nbr,k_nbr;
 	    calculateCellIndices(neighborGID,i_nbr,j_nbr,k_nbr);
-	    
+
 	    bool periodic = false;
 	    switch (geometry) {
 	     case Cartesian:
@@ -686,12 +734,12 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
 	       if (abs((int64_t)k_nbr-(int64_t)k_block) > 1) periodic = true;
 	       break;
 	    }
-	    
+
 	    // Flag periodic neighbor as invalid:
 	    if (periodic == false) validity[neighborLID] = true;
 	 }
       }
-      
+
       const pargrid::CellID N_locals = simClasses.pargrid.getNumberOfLocalCells();
 
       // Push all valid block global IDs (local+ghost) to vector validGlobalIDs:
@@ -703,7 +751,7 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
 	 if (validity[i] == false) continue;
 	 validGlobalIDs.push_back( globalIDs[i] );
       }
-      
+
       const pargrid::CellID N_blocks = validGlobalIDs.size();
       const pargrid::CellID N_ghosts = N_blocks - N_locals;
 
@@ -726,7 +774,7 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
       if (xUnits.size() > 0) attributes["xunits"] = xUnits;
       if (yUnits.size() > 0) attributes["yunits"] = yUnits;
       if (zUnits.size() > 0) attributes["zunits"] = zUnits;
-      
+
       switch (geometry) {
        case Cartesian:
 	 attributes["geometry"] = vlsv::geometry::STRING_CARTESIAN;
@@ -745,7 +793,7 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
 	 simClasses.logger << "(GRIDBUILDER) ERROR: Failed to write block global IDs" << endl << write;
 	 success = false;
       }
-      
+
       // Write number of total and ghost blocks in the domain:
       attributes.clear();
       attributes["mesh"] = meshName;
@@ -756,7 +804,7 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
 	 simClasses.logger << "(GRIDBUILDER) ERROR: Failed to write domain size" << endl << write;
 	 success = false;
       }
-      
+
       // Wait for block local IDs:
       if (simClasses.pargrid.wait(pargrid::DEFAULT_STENCIL,lidArrayID) == false) {
 	 simClasses.logger << "(GRIDBUILDER) ERROR: Failed to exchange block local IDs!" << endl << write;
@@ -771,24 +819,24 @@ bool LogicallyCartesianBuilder::writeMesh(Simulation& sim,SimulationClasses& sim
 	 validNeighbors.push_back(lidArray[i]);
 	 validHosts.push_back(hosts[i]);
       }
-      
+
       // Write ghost block local IDs:
       if (simClasses.vlsv.writeArray("MESH_GHOST_LOCALIDS",attributes,N_ghosts,1,&(validNeighbors[0])) == false) {
 	 simClasses.logger << "(GRIDBUILDER) ERROR: Failed to write ghost block local IDs!" << endl << write;
 	 success = false;
       }
-      
+
       // Write ghost block domain IDs:
       if (simClasses.vlsv.writeArray("MESH_GHOST_DOMAINS",attributes,N_ghosts,1,&(validHosts[0])) == false) {
 	 simClasses.logger << "(GRIDBUILDER) ERROR: Failed to write block ghost domain IDs!" << endl << write;
 	 success = false;
       }
    }
-   
+
    // Remove ParGrid localID array created above:
    simClasses.pargrid.removeDataTransfer(pargrid::DEFAULT_STENCIL,lidArrayID);
    simClasses.pargrid.removeUserData(lidArrayID);
-   
+
    return success;
 }
 
