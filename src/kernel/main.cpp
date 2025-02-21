@@ -222,25 +222,24 @@ int main(int argn,char* args[]) {
    if (randomSeed == 0) randomSeed = time(NULL);
    if (initialized == true) {
       // Master process calculates a random number seed for each process:
-      int* seeds = NULL;
+      vector<int> seeds;
       if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) {
          objectWrapper.simClasses.logger << "(MAIN) Master process generating random number generator seeds ";
          objectWrapper.simClasses.logger << " using initial seed " << randomSeed << endl;
-         seeds = new int[objectWrapper.sim.mpiProcesses];
+         seeds.resize(objectWrapper.sim.mpiProcesses);
          srand(randomSeed);
          for (int p=0; p<objectWrapper.sim.mpiProcesses; ++p) {
             seeds[p] = rand();
             objectWrapper.simClasses.logger << "\t P#" << p << "\t seed: " << seeds[p] << endl;
          }
       }
-      MPI_Scatter(seeds,1,MPI_Type<int>(),&randomSeed,1,MPI_Type<int>(),objectWrapper.sim.MASTER_RANK,objectWrapper.sim.comm);
+      MPI_Scatter(seeds.data(),1,MPI_Type<int>(),&randomSeed,1,MPI_Type<int>(),objectWrapper.sim.MASTER_RANK,objectWrapper.sim.comm);
       
       objectWrapper.simClasses.logger << "(MAIN) Received random seed " << randomSeed << " from master process" << endl;
       if (objectWrapper.simClasses.random.initialize(randomSeed) == false) {
          objectWrapper.simClasses.logger << "(MAIN) ERROR: Failed to initialize random number generator!" << endl << write;
          initialized = false;
-      }      
-      delete [] seeds; seeds = NULL;
+      }
    }
    
    // Init parallel grid
