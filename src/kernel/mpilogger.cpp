@@ -1,6 +1,6 @@
 /** This file is part of Corsair simulation.
  *
- *  Copyright 2011, 2012 Finnish Meteorological Institute
+ *  Copyright 2011-2025 Finnish Meteorological Institute
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ MPILogger::~MPILogger() {
  * MPILogger::open.
  * @return If true, the logfile was closed successfully.*/
 bool MPILogger::close() {
-   if (fileOpen == false) return false;
+   if (fileOpen == false) { return false; }
    #ifndef NDEBUG
       bool success = mpiFile.close();
    #else
@@ -65,7 +65,7 @@ bool MPILogger::close() {
  * @return If true, the buffer was written successfully and buffer was emptied.
  */
 bool MPILogger::flush() {
-   if (fileOpen == false) return false;
+   if (fileOpen == false) { return false; }
    bool success = true;
    #ifdef NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES
       if (mpiRank != masterRank) { return true; }
@@ -100,7 +100,7 @@ bool MPILogger::flush() {
       mpiFile << tmp.str();
 
        // If the write was successful, clear stream buffer:
-      if (mpiFile.getCount<size_t>() != tmp.str().size()) return false;
+      if (mpiFile.getCount<size_t>() != tmp.str().size()) { return false; }
       outStream.str(string(""));
       outStream.clear();
    #else
@@ -121,23 +121,22 @@ bool MPILogger::open(MPI_Comm comm,const int& MASTER_RANK,const std::string& fna
    // Store the MPI rank of this process
    MPI_Comm_rank(comm,&mpiRank);
    masterRank = MASTER_RANK;
-   bool rvalue = true;
-   
+   bool success = true;
    // If NDEBUG has been defined, only master process writes log messages.
    #ifndef NDEBUG
-      if (deleteFile == true) MPI_File_delete(const_cast<char*>(fname.c_str()),MPI_INFO_NULL);
+      if (deleteFile == true) { MPI_File_delete(const_cast<char*>(fname.c_str()),MPI_INFO_NULL); }
       const int accessMode = (MPI_MODE_WRONLY | MPI_MODE_SEQUENTIAL | MPI_MODE_CREATE);
-      if (mpiFile.open(comm,fname,MPI_INFO_NULL,accessMode,true) == false) rvalue = false;
-      if (mpiFile.resetPosition() == false) rvalue = false;
-      if (rvalue == true) fileOpen = true;
+      if (mpiFile.open(comm,fname,MPI_INFO_NULL,accessMode,true) == false) { success = false; }
+      if (mpiFile.resetPosition() == false) { success = false; }
+      if (success == true) { fileOpen = true; }
    #else
-      if (mpiRank != MASTER_RANK) return rvalue;
+      if (mpiRank != MASTER_RANK) { return success; }
       masterStream = new fstream;
       masterStream->open(fname.c_str(), fstream::out);
-      if (masterStream->good() == false) rvalue = false;
+      if (masterStream->good() == false) { success = false; }
       fileOpen = true;
    #endif
-   return rvalue;
+   return success;
 }
 
 bool MPILogger::print(const std::string& s) {
@@ -165,7 +164,7 @@ MPILogger& MPILogger::operator<<(MPILogger& (*pf)(MPILogger&)) {
    #ifndef NDEBUG
       return (*pf)(*this);
    #else
-      if (mpiRank != masterRank) return *this;
+      if (mpiRank != masterRank) { return *this; }
       return (*pf)(*this);
    #endif
 }
@@ -181,7 +180,7 @@ MPILogger& MPILogger::operator<<(std::ostream& (*pf)(std::ostream& )) {
       (*pf)(outStream);
       return *this;
    #else
-      if (mpiRank != masterRank) return *this;
+      if (mpiRank != masterRank) { return *this; }
       (*pf)(outStream);
       return *this;
    #endif

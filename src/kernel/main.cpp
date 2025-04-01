@@ -1,6 +1,6 @@
 /** This file is part of Corsair simulation.
  *
- *  Copyright 2011-2015 Finnish Meteorological Institute
+ *  Copyright 2011-2025 Finnish Meteorological Institute
  *  Copyright 2016 Arto Sandroos
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -21,11 +21,9 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
-
 #ifdef _OPENMP
    #include <omp.h>
 #endif
-
 #include <main.h>
 #include <simulation.h>
 #include <simulationclasses.h>
@@ -46,46 +44,38 @@ const string logFileName = "logfile.txt";
 
 bool continueSimulation(Simulation& sim) {
    bool cont = true;
-   if (sim.maximumTime >= 0.0) if (sim.t >= sim.maximumTime) cont = false;
-   if (sim.maximumTimesteps >= 0) if (sim.timestep >= sim.maximumTimesteps) cont = false;
+   if (sim.maximumTime >= 0.0) { if (sim.t >= sim.maximumTime) { cont = false; } }
+   if (sim.maximumTimesteps >= 0) { if (sim.timestep >= sim.maximumTimesteps) { cont = false; } }
    return cont;
 }
 
-corsair::ObjectWrapper& corsair::getObjectWrapper() {
-   return objectWrapper;
-}
+corsair::ObjectWrapper& corsair::getObjectWrapper() { return objectWrapper; }
 
 void corsair::evaluateComputationalLoad(corsair::ObjectWrapper& owrapper,corsair::ComputationalLoad& global) {
-   
    Real localLoad[compuload::SIZE];
-   for (int i=0; i<compuload::SIZE; ++i) localLoad[i] = 0.0;
-
+   for (int i=0; i<compuload::SIZE; ++i) { localLoad[i] = 0.0; }
    // Calculate computational load of this process:
    for (pargrid::CellID block=0; block<owrapper.simClasses.pargrid.getNumberOfLocalCells(); ++block) {
       localLoad[compuload::SECONDS_PER_CELL] += owrapper.simClasses.pargrid.getCellWeights()[block];
    }
-
    // Sum up number of macroparticles on this process:
    uint64_t N_particles = 0;
    for (size_t l=0; l<owrapper.particleLists.size(); ++l) {
       N_particles += owrapper.particleLists[l]->size();
    }
    localLoad[compuload::N_PARTICLES] = N_particles;
-
    // Reduce avg,min,max values to master process:
    MPI_Reduce(localLoad,global.loadMin,compuload::SIZE,MPI_Type<Real>(),MPI_MIN,owrapper.sim.MASTER_RANK,owrapper.sim.comm);
    MPI_Reduce(localLoad,global.loadMax,compuload::SIZE,MPI_Type<Real>(),MPI_MAX,owrapper.sim.MASTER_RANK,owrapper.sim.comm);
    MPI_Reduce(localLoad,global.loadAvg,compuload::SIZE,MPI_Type<Real>(),MPI_SUM,owrapper.sim.MASTER_RANK,owrapper.sim.comm);
-
    if (owrapper.sim.mpiRank == owrapper.sim.MASTER_RANK) {
       // Average load on processes:
-      for (int i=0; i<compuload::SIZE; ++i) global.loadAvg[i] /= owrapper.sim.mpiProcesses;
-      
+      for (int i=0; i<compuload::SIZE; ++i) { global.loadAvg[i] /= owrapper.sim.mpiProcesses; }
       // Calculate imbalance ratio(s):
       for (int i=0; i<compuload::SIZE; ++i) {
 	 Real minRatio = 0.0, maxRatio = 0.0;
-	 if (fabs(global.loadMin[i]) > 1e-6) minRatio = global.loadAvg[i] / global.loadMin[i];
-	 if (fabs(global.loadMax[i]) > 1e-6) maxRatio = global.loadMax[i] / global.loadAvg[i];
+	 if (fabs(global.loadMin[i]) > 1e-6) { minRatio = global.loadAvg[i] / global.loadMin[i]; }
+	 if (fabs(global.loadMax[i]) > 1e-6) { maxRatio = global.loadMax[i] / global.loadAvg[i]; }
 	 global.ratios[i] = max(minRatio,maxRatio);
       }
    }
@@ -103,16 +93,16 @@ void corsair::evaluateComputationalLoad(corsair::ObjectWrapper& owrapper,corsair
 }
 
 bool checkFileExists(const string fileName) {
-   bool rvalue = false;
+   bool success = false;
    ifstream ifs(fileName.c_str(),ifstream::in);
-   if (ifs.good() == true) { rvalue = true; }
-   return rvalue;
+   if (ifs.good() == true) { success = true; }
+   return success;
 }
 
 int main(int argn,char* args[]) {
    bool initialized = true;
    MPI_Init(&argn,&args);
-   if (objectWrapper.sim.initialize(argn,args) == false) initialized = false;
+   if (objectWrapper.sim.initialize(argn,args) == false) { initialized = false; }
    MPI_Comm_dup(MPI_COMM_WORLD,&objectWrapper.sim.comm);
    MPI_Comm_size(objectWrapper.sim.comm,&objectWrapper.sim.mpiProcesses);
    MPI_Comm_rank(objectWrapper.sim.comm,&objectWrapper.sim.mpiRank);
@@ -198,9 +188,8 @@ int main(int argn,char* args[]) {
    objectWrapper.configReader.get("Simulation.restart_minor_store_amount",objectWrapper.sim.restartMinorFileAmount);
    objectWrapper.configReader.get("Simulation.run_tests",runTestsString);
    objectWrapper.sim.restarted = false;
-   if (doRestart == "yes") objectWrapper.sim.restarted = true;
-   if (runTestsString == "yes") objectWrapper.sim.runTests = true;
-   
+   if (doRestart == "yes") { objectWrapper.sim.restarted = true; }
+   if (runTestsString == "yes") { objectWrapper.sim.runTests = true; }
    if (objectWrapper.sim.dt <= 0.0) {
       objectWrapper.simClasses.logger << "(MAIN) ERROR: Timestep given in parameter 'Simulation.dt' must be > 0." << endl << write;
       initialized = false;
@@ -209,17 +198,18 @@ int main(int argn,char* args[]) {
       objectWrapper.simClasses.logger << "(MAIN) ERROR: Maximum number of timesteps, 'Simulation.maximum_timesteps', and maximum simulation time, 'Simulation.maximum_time', cannot both have negative values." << endl << write;
       initialized = false;
    }
-   
    // Call user-defined "early" initialization function:
-   if (initialized == true) if (userEarlyInitialization(objectWrapper.sim,objectWrapper.simClasses,objectWrapper.configReader,objectWrapper.particleLists) == false) {
-      objectWrapper.simClasses.logger << "(MAIN) ERROR: User-defined early initialization function failed!" << endl << write;
-      initialized = false;
+   if (initialized == true) {
+      if (userEarlyInitialization(objectWrapper.sim,objectWrapper.simClasses,objectWrapper.configReader,objectWrapper.particleLists) == false) {
+	 objectWrapper.simClasses.logger << "(MAIN) ERROR: User-defined early initialization function failed!" << endl << write;
+	 initialized = false;
+      }
    }
 
    // Init random number generator
    int randomSeed;
    objectWrapper.configReader.get("Simulation.random_number_generator.seed",randomSeed);
-   if (randomSeed == 0) randomSeed = time(NULL);
+   if (randomSeed == 0) { randomSeed = time(NULL); }
    if (initialized == true) {
       // Master process calculates a random number seed for each process:
       int* seeds = NULL;
@@ -234,15 +224,13 @@ int main(int argn,char* args[]) {
          }
       }
       MPI_Scatter(seeds,1,MPI_Type<int>(),&randomSeed,1,MPI_Type<int>(),objectWrapper.sim.MASTER_RANK,objectWrapper.sim.comm);
-      
       objectWrapper.simClasses.logger << "(MAIN) Received random seed " << randomSeed << " from master process" << endl;
       if (objectWrapper.simClasses.random.initialize(randomSeed) == false) {
          objectWrapper.simClasses.logger << "(MAIN) ERROR: Failed to initialize random number generator!" << endl << write;
          initialized = false;
-      }      
+      }
       delete [] seeds; seeds = NULL;
    }
-   
    // Init parallel grid
    vector<string> loadBalancingMethods;
    vector<string> imbalanceTolerances;
@@ -265,20 +253,23 @@ int main(int argn,char* args[]) {
          procsPerPartition.push_back("1");
       }
    }
-   
-   if (initialized == true) for (size_t i=0; i<loadBalancingMethods.size(); ++i) {
-      map<pargrid::InputParameter,string> parameters;
-      parameters[pargrid::cellWeightScale]       = "1.0";
-//      parameters[pargrid::edgeWeightScale]       = "0.25";
-      parameters[pargrid::imbalanceTolerance]    = imbalanceTolerances[i];
-      parameters[pargrid::loadBalancingMethod]   = loadBalancingMethods[i];
-      parameters[pargrid::processesPerPartition] = procsPerPartition[i];
-      lb_parameters.push_back(parameters);
+
+   if (initialized == true) {
+      for (size_t i=0; i<loadBalancingMethods.size(); ++i) {
+	 map<pargrid::InputParameter,string> parameters;
+	 parameters[pargrid::cellWeightScale]       = "1.0";
+	 //parameters[pargrid::edgeWeightScale]       = "0.25";
+	 parameters[pargrid::imbalanceTolerance]    = imbalanceTolerances[i];
+	 parameters[pargrid::loadBalancingMethod]   = loadBalancingMethods[i];
+	 parameters[pargrid::processesPerPartition] = procsPerPartition[i];
+	 lb_parameters.push_back(parameters);
+      }
    }
-   
-   if (initialized == true) if (objectWrapper.simClasses.pargrid.initialize(objectWrapper.sim.comm,lb_parameters) == false) {
-      objectWrapper.simClasses.logger << "(MAIN) ERROR: Failed to initialize ParGrid!" << endl << write;
-      initialized = false;
+   if (initialized == true) {
+      if (objectWrapper.simClasses.pargrid.initialize(objectWrapper.sim.comm,lb_parameters) == false) {
+	 objectWrapper.simClasses.logger << "(MAIN) ERROR: Failed to initialize ParGrid!" << endl << write;
+	 initialized = false;
+      }
    }
 
    // Add all known GridBuilders to GridBuilderFactory:
@@ -286,9 +277,11 @@ int main(int argn,char* args[]) {
       objectWrapper.simClasses.logger << "(MAIN) ERROR: Failed to register RestartBuilder!" << endl << write;
       initialized = false;
    }
-   if (initialized == true) if (registerObjectMakers(objectWrapper.objectFactories) == false) {
-      objectWrapper.simClasses.logger << "(MAIN) ERROR: Failed to register GridBuilder(s)!" << endl << write;
-      initialized = false;
+   if (initialized == true) {
+      if (registerObjectMakers(objectWrapper.objectFactories) == false) {
+	 objectWrapper.simClasses.logger << "(MAIN) ERROR: Failed to register GridBuilder(s)!" << endl << write;
+	 initialized = false;
+      }
    }
 
    // Create the requested GridBuilder, and use it to create initial simulation grid:
@@ -331,15 +324,19 @@ int main(int argn,char* args[]) {
          objectWrapper.simClasses.logger << "(MAIN) ERROR: Failed to create GridBuilder with name '" << gridBuilderName << "'" << endl << write;
          initialized = false;
       }
-      if (initialized == true) if (builder->initialize(objectWrapper.sim,objectWrapper.simClasses,objectWrapper.configReader) == false) {
-         objectWrapper.simClasses.logger << "(MAIN) ERROR: GridBuilder initialization failed!" << endl << write;
-         initialized = false;
+      if (initialized == true) {
+	 if (builder->initialize(objectWrapper.sim,objectWrapper.simClasses,objectWrapper.configReader) == false) {
+	    objectWrapper.simClasses.logger << "(MAIN) ERROR: GridBuilder initialization failed!" << endl << write;
+	    initialized = false;
+	 }
       }
       // If simulation was not restarted the regular GridBuilder is used
       // to create the simulation mesh:
-      if (initialized == true && objectWrapper.sim.restarted == false) if (builder->build(objectWrapper.sim,objectWrapper.simClasses) == false) {
-         objectWrapper.simClasses.logger << "(MAIN) ERROR: GridBuilder failed!" << endl << write;
-         initialized = false;
+      if (initialized == true && objectWrapper.sim.restarted == false) {
+	 if (builder->build(objectWrapper.sim,objectWrapper.simClasses) == false) {
+	    objectWrapper.simClasses.logger << "(MAIN) ERROR: GridBuilder failed!" << endl << write;
+	    initialized = false;
+	 }
       }
    }
    #if PROFILE_LEVEL > 0
@@ -350,7 +347,7 @@ int main(int argn,char* args[]) {
    objectWrapper.sim.defaultStencilID = pargrid::DEFAULT_STENCIL;
    vector<pargrid::NeighbourID> nbrTypeIDs;
    for (int k=-1; k<2; ++k) for (int j=-1; j<2; ++j) for (int i=-1; i<2; ++i) {
-      if (i==0 && (j== 0 && k == 0)) continue;
+      if (i==0 && (j== 0 && k == 0)) { continue; }
       nbrTypeIDs.push_back(objectWrapper.simClasses.pargrid.calcNeighbourTypeID(i,j,k));
    }
    objectWrapper.sim.inverseStencilID = objectWrapper.simClasses.pargrid.addStencil(pargrid::remoteToLocalUpdates,nbrTypeIDs);
@@ -359,37 +356,42 @@ int main(int argn,char* args[]) {
       objectWrapper.simClasses.logger << "(MAIN) ERROR: Failed to create inverse Stencil!" << endl << write;
       initialized = false;
    }
-   
+
    // Initialize data operator container:
-   if (initialized == true) if (objectWrapper.dataOperatorContainer.initialize(objectWrapper.configReader,objectWrapper.sim,objectWrapper.simClasses) == false) {
-      objectWrapper.simClasses.logger << "(MAIN) ERROR: DataOperatorContainer initialization failed!" << endl << write;
-      initialized = false;
+   if (initialized == true) {
+      if (objectWrapper.dataOperatorContainer.initialize(objectWrapper.configReader,objectWrapper.sim,objectWrapper.simClasses) == false) {
+	 objectWrapper.simClasses.logger << "(MAIN) ERROR: DataOperatorContainer initialization failed!" << endl << write;
+	 initialized = false;
+      }
    }
    // Call user-defined function which inserts data operators into the container:
-   if (initialized == true) if (registerDataOperators() == false) {
-      objectWrapper.simClasses.logger << "(MAIN) ERROR: Registration of one or more DataOperators failed!" << endl << write;
-      initialized = false;
+   if (initialized == true) {
+      if (registerDataOperators() == false) {
+	 objectWrapper.simClasses.logger << "(MAIN) ERROR: Registration of one or more DataOperators failed!" << endl << write;
+	 initialized = false;
+      }
    }
 
    // Read data save interval from config file:
    string dataSaveIntervalUnit;
    objectWrapper.sim.t_previousDataSave = objectWrapper.sim.t;   
    objectWrapper.configReader.get("Simulation.data_save_interval_unit",dataSaveIntervalUnit);
-   if (dataSaveIntervalUnit == "time") objectWrapper.sim.dataIntervalIsTime = true;
-   else if (dataSaveIntervalUnit == "timestep") objectWrapper.sim.dataIntervalIsTime = false;
+   if (dataSaveIntervalUnit == "time") { objectWrapper.sim.dataIntervalIsTime = true; }
+   else if (dataSaveIntervalUnit == "timestep") { objectWrapper.sim.dataIntervalIsTime = false; }
    else {
       objectWrapper.simClasses.logger << "(MAIN) ERROR: Data save interval unit was not given with parameter 'Simulation.data_save_interval_unit'" << endl;
       objectWrapper.simClasses.logger << "\t or it has an unknown value. Accepted values are 'time' and 'timestep'." << endl << write;
       initialized = false;
    }
-   
+
    if (objectWrapper.sim.dataIntervalIsTime == true) {
       objectWrapper.configReader.get("Simulation.data_save_interval",objectWrapper.sim.dataIntervalFloat);
       if (objectWrapper.sim.dataIntervalFloat != objectWrapper.sim.dataIntervalFloat) {
          objectWrapper.simClasses.logger << "(MAIN) ERROR: Data save interval was not given with parameter 'Simulation.data_save_interval' !" << endl;
          initialized = false;
       }
-   } else {
+   }
+   else {
       objectWrapper.configReader.get("Simulation.data_save_interval",objectWrapper.sim.dataIntervalInteger);
       if (objectWrapper.sim.dataIntervalInteger > 100000) {
          objectWrapper.simClasses.logger << "(MAIN) ERROR: Data save interval was not given with parameter 'Simulation.data_save_interval'" << endl;
@@ -410,19 +412,18 @@ int main(int argn,char* args[]) {
    string meshAlwaysWritten;
    objectWrapper.sim.meshAlwaysWritten = false;
    objectWrapper.configReader.get("Simulation.mesh_always_written",meshAlwaysWritten);
-   if (meshAlwaysWritten == "yes") objectWrapper.sim.meshAlwaysWritten = true;
-   
+   if (meshAlwaysWritten == "yes") { objectWrapper.sim.meshAlwaysWritten = true; }
+
    // Call user-defined "late" initialization function:
    if (initialized == true) {
-      bool status = userLateInitialization(objectWrapper.sim,objectWrapper.simClasses,objectWrapper.configReader,
-                                           objectWrapper.objectFactories,objectWrapper.particleLists);
+      bool status = userLateInitialization(objectWrapper.sim,objectWrapper.simClasses,objectWrapper.configReader,objectWrapper.objectFactories,objectWrapper.particleLists);
       if (status == false) {
          objectWrapper.simClasses.logger << "(MAIN) ERROR: User-defined late initialization function failed " << endl;
          objectWrapper.simClasses.logger << "              on one or more MPI process" << endl << write;
          initialized = false;
       }
    }
-   
+
    // If simulation was restarted, ask particle lists update their internal state(s):
    if (initialized == true && objectWrapper.sim.restarted == true) {
       objectWrapper.simClasses.logger << "(MAIN) Updating particle lists after restart" << endl;
@@ -439,23 +440,24 @@ int main(int argn,char* args[]) {
       objectWrapper.simClasses.logger << "(MAIN) ERROR: Simulation did not initialize correctly" << endl << write;
       initialized = false;
    }
-   
+
    // Distribute initialization status to all processes. If any process 
    // failed to initialize, all processes will know about it:
    int initSum = 0, globalInitSum;
-   if (initialized == false) ++initSum;
+   if (initialized == false) { ++initSum; }
    MPI_Allreduce(&initSum,&globalInitSum,1,MPI_Type<int>(),MPI_SUM,objectWrapper.sim.comm);
-   if (globalInitSum > 0) initialized = false;
-   
+   if (globalInitSum > 0) { initialized = false; }
+
    // Check that initialisation succeeded. If not, exit program (well we just skip 
    // the propagation loop for clean exit):
    if (initialized == true) {
       objectWrapper.simClasses.logger << "(MAIN) Initialization completed." << endl << write;
-   } else {
+   }
+   else {
       objectWrapper.simClasses.logger << "(MAIN) Initialization failed, exiting!" << endl << write;
       if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) {
-         cerr
-	   << endl << "One or more ERRORS occurred during initialization, aborting." << endl << endl
+         cerr << endl
+	   << "One or more ERRORS occurred during initialization, aborting." << endl << endl
 	   << "Here are configuration file parameters read by this compilation of CORSAIR." << endl
 	   << "Check logfile for specific error(s) that were encountered durint init." << endl << endl;
          objectWrapper.configReader.printHelpMessage();
@@ -472,10 +474,11 @@ int main(int argn,char* args[]) {
       objectWrapper.simClasses.logger << "(MAIN) Starting to run test suite" << endl << write;
       if (userRunTests(objectWrapper.sim,objectWrapper.simClasses,objectWrapper.particleLists) == false) {
          objectWrapper.simClasses.logger << "(MAIN) WARNING: User test suite failed" << endl << write;
-      } else {
+      }
+      else {
          objectWrapper.simClasses.logger << "(MAIN) Test suite run successfully" << endl << write;
       }
-   }      
+   }
    #if PROFILE_LEVEL > 0
       profile::stop();
       profile::start("corsair/main loop",profileMainLoopID);
@@ -492,16 +495,12 @@ int main(int argn,char* args[]) {
       #endif
 	  objectWrapper.simClasses.logger << "(MAIN) Saving initial state" << endl;
 	  saveState(objectWrapper.sim,objectWrapper.simClasses,objectWrapper.dataOperatorContainer,objectWrapper.particleLists,builder);
-      
       #if PROFILE_LEVEL > 0
 	  profile::stop();
       #endif
       }
-      
       fstream loads("timeseries_loads.txt", fstream::out);
-      if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) 
-        loads << "#step load(min) load(max) load(avg) imbalance_ratio" << endl;
-      
+      if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) { loads << "#step load(min) load(max) load(avg) imbalance_ratio" << endl; }
       objectWrapper.simClasses.logger << "(MAIN) Starting to run simulation" << endl << write;
       while (continueSimulation(objectWrapper.sim) == true) {
          // If partitioning is checked on this time step, set objectWrapper.sim.countPropagTime to true:
@@ -519,7 +518,8 @@ int main(int argn,char* args[]) {
                objectWrapper.sim.atDataSaveStep = true;
                objectWrapper.sim.t_previousDataSave = objectWrapper.sim.t + objectWrapper.sim.dt;
             }
-         } else {
+         }
+	 else {
             if ((objectWrapper.sim.timestep+1) % objectWrapper.sim.dataIntervalInteger == 0) {
                objectWrapper.sim.atDataSaveStep = true;
             }
@@ -530,7 +530,7 @@ int main(int argn,char* args[]) {
 	 if(objectWrapper.sim.atDataSaveStep == true) {
 	    objectWrapper.simClasses.logger << "(MAIN) At data save step (time step = " << objectWrapper.sim.timestep << ", time = " << objectWrapper.sim.t << ")" << endl << write;
 	 }
-         
+
          // Check if restart file should be written:
          if (objectWrapper.sim.restartWriteInterval > 0 && objectWrapper.sim.timestep != objectWrapper.sim.restartTimestep) {
             if (objectWrapper.sim.timestep % objectWrapper.sim.restartWriteInterval == 0 || objectWrapper.sim.timestep == 0) {
@@ -555,14 +555,14 @@ int main(int argn,char* args[]) {
          #if PROFILE_LEVEL > 0
             profile::stop();
          #endif
-	 
+
          ++objectWrapper.sim.timestep;
          objectWrapper.sim.t += objectWrapper.sim.dt;
 
 	 if(continueSimulation(objectWrapper.sim) == false) {
 	    objectWrapper.simClasses.logger << "(MAIN) At final time step (time step = " << objectWrapper.sim.timestep << ", time = " << objectWrapper.sim.t << ")" << endl << write;
 	 }
-	 
+
          if (objectWrapper.sim.atDataSaveStep == true || continueSimulation(objectWrapper.sim) == false) {
             #if PROFILE_LEVEL > 0
                profile::start("corsair/save",profileSaveID);
@@ -574,7 +574,7 @@ int main(int argn,char* args[]) {
                profile::stop();
             #endif
          }
-	 
+
          // Check if new partitioning should be calculated:
          objectWrapper.sim.meshRepartitioned = false;
          if (objectWrapper.sim.repartitionCheckInterval > 0 && objectWrapper.sim.mpiProcesses > 1) {
@@ -582,23 +582,21 @@ int main(int argn,char* args[]) {
 	           #if PROFILE_LEVEL > 0
                   profile::start("corsair/repartition check",profileRepartitionID);
                #endif
-	       
+
                objectWrapper.simClasses.logger << endl << "(MAIN) Testing for repartitioning (time step = " << objectWrapper.sim.timestep << ", time = " << objectWrapper.sim.t << ")" << endl;
 
                // Evaluate computational load:
                corsair::ComputationalLoad compuLoad;
                corsair::evaluateComputationalLoad(objectWrapper,compuLoad);
-               
+
                // Write statistics of computational load to time series file (master process only):
                if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) {
-                  loads << objectWrapper.sim.timestep << '\t'; 
-                  
+                  loads << objectWrapper.sim.timestep << '\t';
                   // Write min,max,avg,imbalance ratio:
                   loads << compuLoad.loadMin[corsair::compuload::SECONDS_PER_CELL] << '\t';
                   loads << compuLoad.loadMax[corsair::compuload::SECONDS_PER_CELL] << '\t';
                   loads << compuLoad.loadAvg[corsair::compuload::SECONDS_PER_CELL] << '\t';
                   loads << compuLoad.ratios[corsair::compuload::SECONDS_PER_CELL] << '\t';
-                  
                   // Write min,max,avg number of particles and imbalance ratio:
                   loads << compuLoad.loadMin[corsair::compuload::N_PARTICLES] << '\t';
                   loads << compuLoad.loadMax[corsair::compuload::N_PARTICLES] << '\t';
@@ -606,22 +604,18 @@ int main(int argn,char* args[]) {
                   loads << compuLoad.ratios[corsair::compuload::N_PARTICLES] << '\t';
                   loads << endl;
                }
-
                #if PROFILE_LEVEL > 0
                   profile::stop();
                #endif
-	       
                // If current imbalance ratio exceeds maximum tolerance, repartition mesh:
                if (compuLoad.ratios[corsair::compuload::SECONDS_PER_CELL] >= objectWrapper.sim.maximumLoadImbalance) {
                   objectWrapper.simClasses.logger << "\t Repartitioning mesh" << endl;
                   if (objectWrapper.simClasses.pargrid.balanceLoad() == false) {
                      objectWrapper.simClasses.logger << "(MAIN) Load Balancing failed!" << endl << write;
                   }
-
                   // Set variable values to reflect the state of newly repartitioned simulation mesh:
                   objectWrapper.sim.meshChangedStep   = objectWrapper.sim.timestep;
                   objectWrapper.sim.meshRepartitioned = true;
-                  
                   // Ask particle lists to update their internal state:
                   for (size_t plist=0; plist<objectWrapper.particleLists.size(); ++plist) {
                      if (objectWrapper.particleLists[plist]->updateAfterRepartition() == false) {
@@ -642,17 +636,18 @@ int main(int argn,char* args[]) {
    }
    #if PROFILE_LEVEL > 0
       profile::stop();
-      if (initialized == true) profile::print(objectWrapper.sim.comm,objectWrapper.sim.MASTER_RANK);
+      if (initialized == true) { profile::print(objectWrapper.sim.comm,objectWrapper.sim.MASTER_RANK); }
    #endif
-   
+   if (initialized == true) {
+      objectWrapper.simClasses.logger << write << "(MAIN) Exiting simulation after successful run." << endl << write;
+   }
+   else {
+      objectWrapper.simClasses.logger << "(MAIN) Exiting simulation due to error(s)." << endl << write;
+   }
    // Deallocate memory for clean exit:
-   if (initialized == true) objectWrapper.simClasses.logger << write << "(MAIN) Exiting simulation after successful run." << endl << write;
-   else objectWrapper.simClasses.logger << "(MAIN) Exiting simulation due to error(s)." << endl << write;
-   
    if (userFinalization(objectWrapper.sim,objectWrapper.simClasses,objectWrapper.particleLists) == false) {
       objectWrapper.simClasses.logger << "(MAIN) WARNING: User finalization function returned 'false'" << endl << write;
    }
-   
    for (size_t i=0; i<objectWrapper.particleLists.size(); ++i) {
       objectWrapper.particleLists[i]->finalize();
       delete objectWrapper.particleLists[i]; objectWrapper.particleLists[i] = NULL;
@@ -668,7 +663,6 @@ int main(int argn,char* args[]) {
    objectWrapper.simClasses.random.finalize();
    objectWrapper.sim.finalize();
    delete builder; builder = NULL;
-   
    // Exit program:
    MPI_Finalize();
    return 0;

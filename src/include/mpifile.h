@@ -1,6 +1,6 @@
 /** This file is part of Corsair simulation.
  *
- *  Copyright 2011, 2012 Finnish Meteorological Institute
+ *  Copyright 2011-2025 Finnish Meteorological Institute
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 #include <mpi.h>
 #include <string>
 
-
 /** A small class for writing data as byte arrays into a file in parallel.
  * MPI must have been initialized prior to using this class.
  */
@@ -30,22 +29,19 @@ class MPIFile {
  public:
    MPIFile();
    ~MPIFile();
-   
    bool open(MPI_Comm comm,const std::string& fname,MPI_Info file,const int& accessMode,const bool& deleteFile=false);
    bool close();
    /** Get the MPI status struct related to the previous MPI command.
     * See MPI specification for more details.
     * @return MPI status.
     */
-   MPI_Status getStatus() const {return MPIstatus;}
+   MPI_Status getStatus() const { return MPIstatus; }
    bool resetPosition();
-   
    template<typename T> MPIFile& operator<<(const T& value);
    template<typename T> MPIFile& operator>>(T& value);
    template<typename T> T getCount();
    template<typename T,typename INT> bool read(const INT& count,T* const array);
    template<typename T,typename INT> bool write(const INT& count,const T* const array);
-   
  private:
    MPI_File fileptr;     /**< Pointer to file opened with MPI. See MPI specification for more details.*/
    MPI_Info MPIinfo;     /**< Variable for holding MPI file info. See MPI specification for more details.*/
@@ -117,7 +113,7 @@ template<typename T> inline T MPIFile::getCount() {
  * @see MPIFile::resetPosition
  */
 template<typename T,typename INT> inline bool MPIFile::read(const INT& count,T* const array) {
-   if (MPI_File_read_shared(fileptr,array,sizeof(T)*count,MPI_BYTE,&MPIstatus) == MPI_SUCCESS) return true;
+   if (MPI_File_read_shared(fileptr,array,sizeof(T)*count,MPI_BYTE,&MPIstatus) == MPI_SUCCESS) { return true; }
    return false;
 }
 
@@ -132,13 +128,12 @@ template<typename T,typename INT> inline bool MPIFile::read(const INT& count,T* 
  */
 template<typename T,typename INT> inline bool MPIFile::write(const INT& count,const T* const array) {
    ptr = static_cast<void*>(const_cast<T*>(array));
-   bool rvalue = true;
-   //if (MPI_File_write_shared(fileptr,ptr,sizeof(T)*count,MPI_BYTE,&MPIstatus) != MPI_SUCCESS) rvalue = false;   
+   bool success = true;
+   //if (MPI_File_write_shared(fileptr,ptr,sizeof(T)*count,MPI_BYTE,&MPIstatus) != MPI_SUCCESS) { success = false; }
    MPI_Request mpiRequest;
-   if (MPI_File_iwrite_shared(fileptr,ptr,sizeof(T)*count,MPI_BYTE,&mpiRequest) != MPI_SUCCESS) rvalue = false;
+   if (MPI_File_iwrite_shared(fileptr,ptr,sizeof(T)*count,MPI_BYTE,&mpiRequest) != MPI_SUCCESS) { success = false; }
    MPI_Wait(&mpiRequest,&MPIstatus);
-   
-   return rvalue;
+   return success;
 }
 
 #endif
