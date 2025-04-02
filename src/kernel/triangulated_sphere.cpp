@@ -35,19 +35,19 @@ namespace ucdmesh {
       // Generate nodes that make up an icosahedron:
       const Real t = (1.0 + sqrt(5))/2.0;
       const Real s = sqrt(1.0 + t*t);
-      
+
       nodes.push_back(Node(t/s,1/s,0));
       nodes.push_back(Node(-t/s,1/s,0));
       nodes.push_back(Node(t/s,-1/s,0));
-      
+
       nodes.push_back(Node(-t/s,-1/s,0));
       nodes.push_back(Node(1/s,0,t/s));
       nodes.push_back(Node(1/s,0,-t/s));
-      
+
       nodes.push_back(Node(-1/s,0,t/s));
       nodes.push_back(Node(-1/s,0,-t/s));
       nodes.push_back(Node(0,t/s,1/s));
-      
+
       nodes.push_back(Node(0,-t/s,1/s));
       nodes.push_back(Node(0,t/s,-1/s));
       nodes.push_back(Node(0,-t/s,-1/s));
@@ -57,7 +57,7 @@ namespace ucdmesh {
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,1,10,7));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,2,9,11));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,7,3,1));
-      
+
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,0,5,10));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,3,9,6));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,3,11,9));
@@ -67,17 +67,17 @@ namespace ucdmesh {
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,3,7,11));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,4,2,0));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,9,4,6));
-      
+
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,2,11,5));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,0,10,8));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,5,0,2));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,10,5,7));
-      
+
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,1,6,8));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,1,8,10));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,6,1,3));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,11,7,5));
-      
+
       return true;
    }
 
@@ -93,7 +93,7 @@ namespace ucdmesh {
       nodes.push_back(Node( 0,-1, 0));
       nodes.push_back(Node( 0, 0,+1));
       nodes.push_back(Node( 0, 0,-1));
-      
+
       // Generate faces:
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,4,0,2));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,5,2,0));
@@ -103,7 +103,7 @@ namespace ucdmesh {
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,5,3,1));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,4,3,0));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,5,0,3));
-      
+
       return true;
    }
 
@@ -117,16 +117,16 @@ namespace ucdmesh {
       nodes.push_back(Node(2.0/3.0*sqrt(2),0,-1.0/3.0));
       nodes.push_back(Node(-sqrt(2.0)/3.0,sqrt(6.0)/3.0,-1.0/3.0));
       nodes.push_back(Node(-sqrt(2.0)/3.0,-sqrt(6.0)/3.0,-1.0/3.0));
-      
+
       // Generate faces:
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,0,1,2));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,0,2,3));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,0,3,1));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,1,3,2));
-      
+
       return true;
    }
-   
+
    bool getFaceData(const std::vector<Node>& nodes,const std::vector<TriangularFace>& faces,std::vector<Real>& faceData) {
       bool success = true;
       faceData.clear();
@@ -161,7 +161,7 @@ namespace ucdmesh {
 	    success = false;
 	    break;
 	 }
-	 
+
 	 ptrArea   += ucdmesh::facedataelement::SIZE;
 	 ptrNormal += ucdmesh::facedataelement::SIZE;
       }      
@@ -178,19 +178,19 @@ namespace ucdmesh {
       for (size_t node=0; node<nodes.size(); ++node) {
 	 // Calculate current distance to origin:
 	 const Real r = sqrt(nodes[node].x*nodes[node].x + nodes[node].y*nodes[node].y + nodes[node].z*nodes[node].z);
-	 
+
 	 // Normalize radius to radius0:
 	 nodes[node].x *= (radius/r);
 	 nodes[node].y *= (radius/r);
 	 nodes[node].z *= (radius/r);
-	 
+
 	 currentCentroid[0] += nodes[node].x;
 	 currentCentroid[1] += nodes[node].y;
 	 currentCentroid[2] += nodes[node].z;
       }
-      
+
       for (int i=0; i<3; ++i) currentCentroid[i] /= nodes.size();
-      
+
       // Shift centroid:
       for (size_t node=0; node<nodes.size(); ++node) {
 	 nodes[node].x += (centroid[0]-currentCentroid[0]);
@@ -211,14 +211,14 @@ namespace ucdmesh {
    bool createSphere(spheregenerator::Method method,int refinements,Real centroid[3],Real radius,
 		     std::vector<Node>& nodes,std::vector<TriangularFace>& faces,std::size_t& N_connections) {
       bool result = true;
-      
+
       // Sanity check on input parameters:
       if (refinements < 0) result = false;
       if (radius <= 0.0) result = false;
-      
+
       // Exit if error(s) have occurred:
       if (result == false) return result;
-      
+
       nodes.clear();
       faces.clear();
 
@@ -238,7 +238,7 @@ namespace ucdmesh {
 	 result = false;
 	 break;
       }
-      
+
       // Exit if error(s) have occurred:
       if (result == false) {
 	 nodes.clear();
@@ -246,7 +246,7 @@ namespace ucdmesh {
 	 N_connections = 0;
 	 return result;
       }
-      
+
       // Refine:
       for (int i=0; i<refinements; ++i) refineFaces(nodes,faces);
 
@@ -256,5 +256,5 @@ namespace ucdmesh {
       N_connections = 5*faces.size();
       return result;
    }
-   
+
 } // namespace ucdmesh

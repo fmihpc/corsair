@@ -51,7 +51,7 @@ bool LoadTSeriesOP::writeData(const std::string& spatMeshName,const std::vector<
    #if PROFILE_LEVEL > 0
       profile::start("Load Time Series",profileID);
    #endif
-   
+
    // Write buffer to output file:
    map<string,string> attributes;
    //attributes["mesh"] = spatMeshName;
@@ -59,7 +59,7 @@ bool LoadTSeriesOP::writeData(const std::string& spatMeshName,const std::vector<
    attributes["ylabel"] = "Computational load";
    attributes["xunit"] = "s";
    attributes["yunit"] = "s";
-   
+
    Real load = 0.0;
    for (pargrid::CellID block=0; block<simClasses->pargrid.getNumberOfLocalCells(); ++block) {
       load += simClasses->pargrid.getCellWeights()[block];
@@ -73,7 +73,7 @@ bool LoadTSeriesOP::writeData(const std::string& spatMeshName,const std::vector<
    attributes["name"] = "load_avg";   
    load /= sim->mpiProcesses;
    if (simClasses->vlsv.writeWithReduction("TIMESERIES",attributes,1,&load,MPI_SUM) == false) success = false;
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop();
    #endif

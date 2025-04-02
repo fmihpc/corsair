@@ -47,26 +47,26 @@ bool MPIRank::initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& sim
 bool MPIRank::writeData(const std::string& spatMeshName,const std::vector<ParticleListBase*>& particleLists) {
    if (getInitialized() == false) return false;
    profile::start("MPIRank",mpiRankID);
-   
+
    const string arrayType = "celldata";
    const uint64_t arraySize = simClasses->pargrid.getNumberOfLocalCells()*block::SIZE;
    const uint64_t vectorSize = 1;
-   
+
    // Allocate output buffer:
    int* buffer = new int[arraySize*vectorSize];
-   
+
    // Copy data to buffer:
    const int rank = sim->mpiRank;
    for (size_t cell=0; cell<simClasses->pargrid.getNumberOfLocalCells(); ++cell) {
       for (int i=0; i<block::SIZE; ++i) buffer[cell*block::SIZE+i] = rank;
    }
-   
+
    // Write buffer to output file:
    map<string,string> attributes;
    attributes["name"] = getName();
    attributes["mesh"] = spatMeshName;
    attributes["type"] = arrayType;
-       
+
    bool success = true;
    if (simClasses->vlsv.writeArray("VARIABLE",attributes,arraySize,vectorSize,buffer) == false) success = false;
    delete [] buffer;

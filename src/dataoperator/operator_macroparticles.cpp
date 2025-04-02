@@ -54,7 +54,7 @@ bool MacroParticlesOperator::writeData(const std::string& spatMeshName,const std
    // Sum up total number of macroparticles in each block:
    for (size_t species=0; species<particleLists.size(); ++species) {
       const uint32_t* N_particles = particleLists[species]->getParticleNumberArray();
-   
+
       for (pargrid::CellID blockLID=0; blockLID<N_cells; ++blockLID) {
 	 for (int32_t c=0; c<block::SIZE; ++c) {
 	    buffer[blockLID*block::SIZE+c] += N_particles[blockLID];

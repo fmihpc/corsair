@@ -47,7 +47,7 @@ bool CellIDOP::initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& si
 bool CellIDOP::writeData(const std::string& spatMeshName,const std::vector<ParticleListBase*>& particles) {
    if (getInitialized() == false) return false;
    profile::start("CellID",cellIDprofileID);
-   
+
    // Allocate output buffer:
    const vector<pargrid::CellID>& globalIDs = simClasses->pargrid.getGlobalIDs();
    const uint64_t N_localBlocks = simClasses->pargrid.getNumberOfLocalCells();
@@ -55,17 +55,17 @@ bool CellIDOP::writeData(const std::string& spatMeshName,const std::vector<Parti
    for (size_t i=0; i<N_localBlocks; ++i) {
       for (int j=0; j<block::SIZE; ++j) blockIDs[i*block::SIZE+j] = globalIDs[i];
    }
-   
+
    // Write buffer to output file:
    const string arrayType = "celldata";
    const uint64_t arraySize = N_localBlocks*block::SIZE;
    const uint64_t vectorSize = 1;
-   
+
    map<string,string> attributes;
    attributes["name"] = getName();
    attributes["mesh"] = spatMeshName;
    attributes["type"] = arrayType;
-   
+
    bool success = true;
    if (simClasses->vlsv.writeArray("VARIABLE",attributes,arraySize,vectorSize,&(blockIDs[0])) == false) success = false;
    profile::stop();

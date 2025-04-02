@@ -33,10 +33,10 @@ class ParticleBoundaryCondBase {
  public:
    /** Default constructor (empty).*/
    ParticleBoundaryCondBase();
-   
+
    /** Default virtual destructor (empty).*/
    virtual ~ParticleBoundaryCondBase();
-   
+
    /** Add all configuration file items read by this class to given config file reader.
     * Base class implementation simply returns value 'true'.
     * @param cr Configuration file reader.
@@ -44,7 +44,7 @@ class ParticleBoundaryCondBase {
     * parameters for this particle injector.
     * @return If true, configuration file items were added successfully.*/
    virtual bool addConfigFileItems(ConfigReader& cr,const std::string& regionName);
-   
+
    /** Apply boundary conditions to all particles in given cells. Typically one should remove 
     * all particles on simulation boundary cells, i.e., set N_particles[blockLID]=0 and remove 
     * the particles from ParGrid dynamic data array containing particles.
@@ -54,12 +54,12 @@ class ParticleBoundaryCondBase {
     * @param cells List of simulation boundary cells on this process, identified by their local IDs.
     * @return If true, boundary conditions were successfully applied to all particles.*/
    virtual bool apply(pargrid::DataID particleDataID,unsigned int* N_particles,const std::vector<pargrid::CellID>& cells);
-   
+
    /** Finalize class. This function should deallocate all internal memory.
     * Base class version simply returns value 'true'.
     * @return If true, class was finalized successfully.*/
    virtual bool finalize();
-   
+
    /** Initialize particle injector. All inheriting classes should call base class initialize
     * function to set member variables ParticleBoundaryCondBase::sim and ParticleBoundaryCondBase::simClasses.
     * @param sim Generic simulation control variables.
@@ -70,7 +70,7 @@ class ParticleBoundaryCondBase {
     * @return If true, class was successfully initialized and is ready for use.*/
    virtual bool initialize(Simulation& sim,SimulationClasses& simClasses,ConfigReader& cr,
 			   const std::string& regionName,const ParticleListBase* plist);
-   
+
  protected:
    Simulation* sim;               /**< Generic simulation control variables.*/
    SimulationClasses* simClasses; /**< Generic simulation classes.*/

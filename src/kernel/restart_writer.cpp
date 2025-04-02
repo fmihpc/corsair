@@ -30,16 +30,16 @@ bool exitStatus(const bool& status) {
 void removeOldRestartFiles(Simulation& sim) {
    if (sim.mpiRank != sim.MASTER_RANK) return;
    if (sim.restartMinorFileAmount == 0) return;
-   
+
    map<size_t,string> restartFiles;
-   
+
    const string directory = ".";
    const string prefix = sim.restartFilenamePrefix;
    const string suffix = ".vlsv";
-   
+
    DIR* dir = opendir(directory.c_str());
    if (dir == NULL) return;
-   
+
    struct dirent* entry = readdir(dir);
    while (entry != NULL) {
       // Check that the directory entry is a valid restart file:
@@ -57,13 +57,13 @@ void removeOldRestartFiles(Simulation& sim) {
       // Parse the timestep at which restart file was written:
       const size_t size = entryName.size() - prefix.size() - suffix.size();
       const size_t timestep = atoi(entryName.substr(prefix.size(),size).c_str());
-      
+
       // Add the timestep and filename to map 'restartFiles':
       restartFiles[timestep] = entryName;
       entry = readdir(dir);
    }
    closedir(dir);
-   
+
    // Skip filenames that are kept:
    if (restartFiles.size() <= (sim.restartMinorFileAmount-1)) return;
    map<size_t,string>::reverse_iterator it=restartFiles.rbegin();
@@ -76,7 +76,7 @@ void removeOldRestartFiles(Simulation& sim) {
 	 ++it;
 	 continue;
       }
-      
+
       remove(it->second.c_str());
       ++it;
    }
@@ -90,7 +90,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
 
    simClasses.logger << endl << "(RESTART WRITER) Starting to write restart data" << endl;
    removeOldRestartFiles(sim);
-   
+
    // Name of the simulation mesh:
    const string meshName = "SpatialGrid";
 
@@ -100,7 +100,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
    ss.fill('0');
    ss << sim.restartFilenamePrefix << setw(8) << sim.timestep << ".vlsv";
    ss >> fileName;
-   
+
    // Open output file for parallel writing:
    if (simClasses.vlsv.open(fileName,sim.comm,sim.MASTER_RANK) == false) {
       simClasses.logger << "\t Failed to open output file '" << fileName << "'!" << endl << write;
@@ -109,14 +109,14 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
 
    // Simulation mesh is written as an old-style VLSV mesh:
    map<string,string> attribs;
-   
+
    const uint64_t N_blocks = simClasses.pargrid.getNumberOfLocalCells();
-   
+
    // Write necessary simulation parameters (only master process ends up writing these):
    if (simClasses.vlsv.writeParameter("time",&sim.t) == false) success = false;
    if (simClasses.vlsv.writeParameter("time step",&sim.timestep) == false) success = false;
    if (simClasses.vlsv.writeParameter("dt",&sim.dt) == false) success = false;
-   
+
    // Write name of mesh (master process only):
    attribs["name"] = meshName;
    attribs["type"] = "mesh name";
@@ -132,7 +132,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
 	 success = false;
       }
    }
-   
+
    // Write global IDs of all local blocks as a variable:
    attribs["name"] = "CellID";
    attribs["mesh"] = meshName;
@@ -141,7 +141,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
       simClasses.logger << "\t Failed to write block global IDs!" << endl << write;
       success = false;
    }
-   
+
    // Write global IDs of blocks' neighbours. Note that ParGrid stores neighbour local IDs
    // so we need to convert them to global IDs before writing:
    pargrid::NeighbourID* nbrTypeIDs = new pargrid::NeighbourID[N_blocks*(pargrid::N_neighbours-1)];
@@ -149,12 +149,12 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
    for (pargrid::CellID block=0; block<N_blocks; ++block) {
       // Get pointer to array containing cell neighbour local IDs:
       pargrid::CellID* nbrIDs = simClasses.pargrid.getCellNeighbourIDs(block);
-      
+
       int counter = 0;
       for (pargrid::NeighbourID n=0; n<pargrid::N_neighbours; ++n) {
 	 // Block is not its own neighbour here:
 	 if (n == simClasses.pargrid.calcNeighbourTypeID(0,0,0)) continue;
-	 
+
 	 nbrTypeIDs[block*(pargrid::N_neighbours-1)+counter]   = n;
 	 if (nbrIDs[n] == pargrid::INVALID_CELLID) {
 	    nbrGlobalIDs[block*(pargrid::N_neighbours-1)+counter] = pargrid::INVALID_CELLID;
@@ -164,7 +164,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
 	 ++counter;
       }
    }
-   
+
    attribs["name"] = "NbrTypeID";
    attribs["mesh"] = meshName;
    attribs["type"] = "celldata";
@@ -173,7 +173,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
       success = false;
    }
    delete [] nbrTypeIDs; nbrTypeIDs = NULL;
-   
+
    attribs["name"] = "NbrGlobalID";
    attribs["mesh"] = meshName;
    attribs["type"] = "celldata";
@@ -196,7 +196,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
       attribs["mesh"] = meshName;
       attribs["type"] = "celldata";      
       const uint64_t vectorSize = arrayElements[i];
-      
+
       if (simClasses.vlsv.writeArray("STATIC",attribs,arrayDatatypes[i],N_blocks,vectorSize,arrayByteSizes[i],arrayPointers[i]) == false) {
 	 simClasses.logger << "\t Failed to write static user data array '" << arrayNames[i] << "'!" << endl << write;
 	 success = false;

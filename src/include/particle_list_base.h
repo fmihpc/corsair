@@ -70,21 +70,21 @@ class ParticleListBase {
    // ***** PURE VIRTUAL FUNCTIONS. THESE MUST BE DEFINED BY CLASSES ***** //
    // *****             THAT INHERIT PARTICLELISTBASE                ***** //
    // ******************************************************************** //
-   
+
    /** Accumulate particles on boundary cells.
     * @return If true, all particles on boundary cells were accumulated successfully.*/
    virtual bool accumulateBoundaryCells() = 0;
-   
+
    /** Accumulate particles on inner cells.
     * @return If true, all particles on inner cells were accumulated successfully.*/
    virtual bool accumulateInnerCells() = 0;
-   
+
    /** Apply boundary conditions to all particles on exterior cells, i.e. cells 
     * that are on the boundary of the simulation domain. Typically particles in 
     * these cells are removed.
     * @return If true, boundary conditions were successfully applied.*/
    virtual bool applyBoundaryConditions() = 0;
-   
+
    /** Clear arrays used in particle accumulation. This step can be done while 
     * we are waiting for particle transfers to complete.
     * @return If true, accumulation arrays were cleared successfully.*/
@@ -93,19 +93,19 @@ class ParticleListBase {
    /** Get class defining the propagated particle species.
     * @return Particle species.*/
    virtual const void* getSpecies() const = 0;
-   
+
    /** Get a description of the type of species propagated by this particle list.
     * @return Description of species.*/
    virtual const std::string& getSpeciesType() const = 0;
-   
+
    /** Inject new particles.
     * @param If true, particle injection was completed successfully.*/
    virtual bool injectParticles() = 0;
-   
+
    /** Propagate particles on boundary cells.
     * @return If true, all particles were propagated successfully.*/
    virtual bool propagateBoundaryCellParticles() = 0;
-   
+
    /** Propagate particles on inner cells.
     * @return If true, all particles were propagated successfully.*/
    virtual bool propagateInnerCellParticles() = 0;
@@ -114,28 +114,28 @@ class ParticleListBase {
     * stored on all local cells.
     * @return Total number of particles stored on this ParticleList on this process.*/
    virtual size_t size() const = 0;
-   
+
    virtual bool updateAfterRepartition() = 0;
-   
+
    /** Wait for all particle sends to complete.
     * @return If true, all particles were sent successfully.*/
    virtual bool waitParticleSends() = 0;
-   
+
    /** Write particles to output file.
     * @param spatMeshName Name of the spatial mesh. This parameter can be ignored.
     * @return If true, particles were written successfully.*/
    virtual bool writeParticles(const std::string& spatMeshName) = 0;
-   
+
  protected:
-   
+
    // ***** VARIABLES RELATED TO MPI ***** //
    MPI_Datatype particleType;                           /**< MPI datatype used to transfer particles.*/
-   
+
    // ***** VARIABLES RELATED TO PARTICLE DATA ***** //
    pargrid::DataID particleDataID;                      /**< ID of ParGrid dynamic data array that contains the 
 							 * particles this ParticleList propagates.*/
    uint32_t* N_particles;
-   
+
    // ***** MISCELLANEOUS CLASS VARIABLES ****** //
    bool initialized;                                    /**< If true, class implementing ParticleListBase has initialized successfully.*/
    Simulation* sim;                                     /**< Struct containing generic simulation variables.*/
@@ -155,11 +155,11 @@ class ParticleListBase {
    ParticleBoundaryCondBase* boundaryCond;              /**< Particle boundary condition.*/
    ParticleInjectorBase* injector;                      /**< Particle injector.*/
    ParticlePropagatorBase* propagator;                  /**< Particle propagator.*/
-   
+
    // ***** VARIABLES RELATED TO PROFILING ***** //
    #if PROFILE_LEVEL > 0
       std::string profileName;       /**< Profiler label for this ParticleList.*/
-   
+
       int accumID;                   /**< Total time spent in particle accumulation.*/
       int accumArrayClears;          /**< Time spen in clearing accumulation array(s).*/
       int accumMPIWaits;             /**< Time spent in MPI waits during accumulation.*/

@@ -46,16 +46,16 @@ class ObjectFactoryGeneric {
  public:
    ObjectFactoryGeneric();
    ~ObjectFactoryGeneric();
-   
+
    PRODUCT* create(const std::string& name) const;
    bool exists(const std::string& name) const;
    bool registerMaker(const std::string& name,PRODUCT* (*ProductMaker)());
-   
+
  private:
-   
+
    std::map<std::string,PRODUCT* (*)()> registeredMakers; /**< Container for all registered PRODUCTs. In reality function 
 							   * pointers that return a new PRODUCT are stored here.*/							  
-							   
+
 };
 
 /** Default constructor (empty).*/
@@ -107,4 +107,3 @@ bool ObjectFactoryGeneric<PRODUCT>::registerMaker(const std::string& name,PRODUC
 }
 
 #endif
- 

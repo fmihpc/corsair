@@ -25,7 +25,7 @@ class MPIRank: public DataOperator {
  public:
    MPIRank();
    ~MPIRank();
-   
+
    bool finalize();
    std::string getName() const;
    bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);

@@ -29,13 +29,13 @@
  * surfaces. */
 
 namespace ucdmesh {
-   
+
    bool createPlane(const std::vector<Real>& corners,int refinements,std::vector<Node>& nodes,
 		    std::vector<TriangularFace>& faces,std::size_t& N_connections);
-   
+
    bool getPlanarFaceData(const std::vector<Node>& nodes,const std::vector<TriangularFace>& faces,
 			  std::vector<Real>& faceData);
 
 } // namespace ucdmesh
-   
+
 #endif

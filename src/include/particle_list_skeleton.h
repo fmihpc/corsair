@@ -65,7 +65,7 @@ class ParticleListSkeleton: public ParticleListBase {
  public:
    ParticleListSkeleton();
    virtual ~ParticleListSkeleton();
-   
+
    virtual bool accumulateBoundaryCells();
    virtual bool accumulateInnerCells();
    virtual bool applyBoundaryConditions();
@@ -82,7 +82,7 @@ class ParticleListSkeleton: public ParticleListBase {
    virtual bool updateAfterRepartition();
    virtual bool writeParticles(const std::string& spatMeshName);
    virtual bool waitParticleSends();
-   
+
  protected:
 
    // ***** VARIABLES RELATED TO SENDING AND RECEIVING PARTICLES ***** //
@@ -91,11 +91,11 @@ class ParticleListSkeleton: public ParticleListBase {
    std::vector<BUFFER> outBuffers;
    std::vector<pargrid::CopyProtocolMPI<BUFFER> > inBufferCopy;
    std::vector<pargrid::CopyProtocolMPI<BUFFER> > outBufferCopy;
-   
+
    static unsigned int LIDsCalculatedTimestep;
    static std::vector<std::vector<pargrid::CellID> > recvLIDs;
    static std::vector<std::vector<pargrid::CellID> > sendLIDs;
-   
+
    // ***** MISCELLANEOUS CLASS VARIABLES ***** //
    SPECIES species;                   /**< Particle species, i.e. parameters common to all particles.*/
    unsigned int meshVariablesUpdated; /**< Time step at which updatePartitioning was last called, this variable 
@@ -143,7 +143,7 @@ template<class SPECIES,class PARTICLE> inline
 bool ParticleListSkeleton<SPECIES,PARTICLE>::accumulateBoundaryCells() {
    bool success = true;
    if (initialized == false) return false;
-   
+
    #if PROFILE_LEVEL > 0
       profile::start(profileName,totalTimeID);
    #endif
@@ -152,10 +152,10 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::accumulateBoundaryCells() {
    #if PROFILE_LEVEL > 0
       profile::start("Accumulator",accumID);
    #endif
-   
+
    // Accumulate particle quantities:
    if (accumulator->accumulateBoundaryCells(particleDataID,N_particles) == false) success = false;
-   
+
    // Send locally calculated update(s) to remote neighbour(s):
    #if PROFILE_LEVEL > 0
       profile::start("MPI overhead",accumMPIOverheads);
@@ -164,7 +164,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::accumulateBoundaryCells() {
    #if PROFILE_LEVEL > 0
       profile::stop(); // MPI overhead
    #endif
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop(); // accumulation step
       profile::stop(); // total time
@@ -184,14 +184,14 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::accumulateInnerCells() {
       profile::start(profileName,totalTimeID);
    #endif
    if (sim->meshRepartitioned == true) updatePartitioning();
-   
+
    // Accumulate particle quantities:
    #if PROFILE_LEVEL > 0
       profile::start("Accumulator",accumID);
    #endif
-   
+
    if (accumulator->accumulateInnerCells(particleDataID,N_particles) == false) success = false;
-   
+
    // Wait for updates to arrive from remote neighbours:
    #if PROFILE_LEVEL > 0
       profile::start("MPI waits",accumMPIWaits);
@@ -200,7 +200,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::accumulateInnerCells() {
    #if PROFILE_LEVEL > 0
       profile::stop(); // MPI Waits
    #endif
-   
+
    // Add updates received from remote neighbour(s) to local mesh variable(s):
    #if PROFILE_LEVEL > 0
       profile::start("MPI overhead",accumMPIOverheads);
@@ -209,7 +209,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::accumulateInnerCells() {
    #if PROFILE_LEVEL > 0
       profile::stop(); // MPI overhead
    #endif
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop(); // Accumulator
       profile::stop(); // Total time
@@ -225,7 +225,7 @@ template<class SPECIES,class PARTICLE> inline
 bool ParticleListSkeleton<SPECIES,PARTICLE>::applyBoundaryConditions() {
    bool success = true;
    if (initialized == false) return false;
-   
+
    #if PROFILE_LEVEL > 0
       profile::start(profileName,totalTimeID);
       profile::start("Particle Step",particleTotalID);
@@ -250,7 +250,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::applyBoundaryConditions() {
 template<class SPECIES,class PARTICLE> inline
 bool ParticleListSkeleton<SPECIES,PARTICLE>::clearAccumulationArrays() {
    if (initialized == false) return false;
-   
+
    #if PROFILE_LEVEL > 0
       profile::start(profileName,totalTimeID);
       profile::start("Accumulator",accumID);
@@ -259,7 +259,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::clearAccumulationArrays() {
 
    if (sim->meshRepartitioned == true) updatePartitioning();
    const bool success = accumulator->clearAccumulationArrays();
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop();
       profile::stop();
@@ -283,7 +283,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::finalize() {
 	inBufferCopy.swap(dummy1);
 	outBufferCopy.swap(dummy2);
      }
-   
+
    // Cleanly deallocate buffers:
      {
 	std::vector<BUFFER> dummy1;
@@ -291,10 +291,10 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::finalize() {
 	inBuffers.swap(dummy1);
 	outBuffers.swap(dummy2);
      }
-   
+
    // Deallocate memory and call finalizers:
    if (species.finalize() == false) success = false;
-   
+
    // ParticleListBase finalize() deallocates ParGrid data arrays 
    // and frees MPI datatype.
    if (ParticleListBase::finalize() == false) success = false;
@@ -345,7 +345,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::initialize(Simulation& sim,Simulati
    cr.add(speciesName+".injector.parameters","Name of the config region that defines parameters for injector.",std::string(""));
    cr.add(speciesName+".propagator.parameters","Name of the config region that defines parameters for propagator.",std::string(""));
    cr.parse();
-   
+
    cr.get(speciesName+".injector.name",injectorName);
    cr.get(speciesName+".injector.parameters",injectorParams);
    cr.get(speciesName+".propagator.name",propagatorName);
@@ -354,14 +354,14 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::initialize(Simulation& sim,Simulati
    cr.get(speciesName+".boundary_condition.parameters",bcondParams);
    cr.get(speciesName+".accumulator.name",accumulatorName);
    cr.get(speciesName+".accumulator.parameters",accumulatorParams);
-   
+
    // Attempt to create particle injector:
    injector = objectFactories.particleInjectors.create(injectorName);
    if (injector == NULL) {
       simClasses.logger << "(PARTICLELIST) ERROR: Particle injector '" << injectorName << "' does not exist!" << std::endl << write;
       success = false;
    }
-   
+
    // Read injector's parameters from config file:
    if (injector != NULL) {
       if (injector->addConfigFileItems(cr,injectorParams) == false) {
@@ -373,14 +373,14 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::initialize(Simulation& sim,Simulati
 	 success = false;
       }
    }
-   
+
    // Attempt to create particle boundary condition:
    boundaryCond = objectFactories.particleBoundaryConditions.create(bcondName);
    if (boundaryCond == NULL) {
       simClasses.logger << "(PARTICLELIST) ERROR: Particle boundary condition '" << bcondName << "' does not exist!" << std::endl << write;
       success = false;
    }
-   
+
    // Read particle propagator's parameters from config file:
    if (boundaryCond != NULL) {
       if (boundaryCond->addConfigFileItems(cr,bcondParams) == false) {
@@ -392,14 +392,14 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::initialize(Simulation& sim,Simulati
 	 success = false;
       }
    }
-   
+
    // Attempt to create particle propagator:
    propagator = objectFactories.particlePropagators.create(propagatorName);
    if (propagator == NULL) {
       simClasses.logger << "(PARTICLELIST) ERROR: Particle propagator '" << propagatorName << "' does not exist!" << std::endl << write;
       success = false;
    }
-   
+
    // Read particle propagator's parameters from config file:
    if (propagator != NULL) {
       if (propagator->addConfigFileItems(cr,propagatorParams) == false) {
@@ -411,14 +411,14 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::initialize(Simulation& sim,Simulati
 	 success = false;
       }
    }
-   
+
    // Attempt to create particle accumulator:
    accumulator = objectFactories.particleAccumulators.create(accumulatorName);
    if (accumulator == NULL) {
       simClasses.logger << "(PARTICLELIST) ERROR: Particle accumulator '" << accumulatorName << "' does not exist!" << std::endl << write;
       success = false;
    }
-   
+
    // Read accumulator's parameters from config file:
    if (accumulator != NULL) {
       if (accumulator->addConfigFileItems(cr,accumulatorParams) == false) {
@@ -430,7 +430,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::initialize(Simulation& sim,Simulati
 	 success = false;
       }
    }
-   
+
    // Clear N_particles array to zero value unless simulation was restarted.
    // In the latter case contents of N_particles are correct:
    delete [] N_particles;
@@ -438,7 +438,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::initialize(Simulation& sim,Simulati
    if (success == true && sim.restarted == false) {
       for (pargrid::CellID block=0; block<simClasses.pargrid.getNumberOfLocalCells(); ++block) N_particles[block] = 0;
    }
-   
+
    // Create a ParGrid dynamic data array for the particles:
    particleDataID = simClasses.pargrid.addUserData<PARTICLE>(speciesName+"_particles",0,true);
    if (particleDataID == pargrid::INVALID_DATAID) {
@@ -446,24 +446,24 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::initialize(Simulation& sim,Simulati
       simClasses.logger << speciesName << "' !" << std::endl << write;
       success = false;
    }
-   
+
    // Inject particles unless simulation was restarted. In the 
    // latter case ParGrid dynamic array contains already the particles:
    if (success == true && sim.restarted == false) {
       if (injector->inject(particleDataID,N_particles) == false) success = false;
    }
-   
+
    // Get an MPI datatype for transferring particles and commit it:
    if (success == true) {
       PARTICLE::getDatatype(particleType);
       MPI_Type_commit(&particleType);
    }
-   
+
    #if PROFILE_LEVEL > 0
       // Create profiler name:
       profileName = "ParticleList "+species.getName();
    #endif
-   
+
    if (success == true) initialized = true;
    return initialized;
 }
@@ -483,10 +483,10 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::injectParticles() {
    #endif
 
    if (sim->meshRepartitioned == true) updatePartitioning();
-   
+
    // Inject new particles:
    if (injector->inject(particleDataID,N_particles) == false) success = false;
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop();
       profile::stop();
@@ -510,7 +510,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateBoundaryCellParticles() {
       profile::start(profileName,totalTimeID);
       profile::start("Particle Step",particleTotalID);
    #endif
-   
+
    #if PROFILE_LEVEL > 0
       profile::start("MPI overhead",mpiOverheadID);
    #endif
@@ -542,7 +542,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateBoundaryCellParticles() {
 
    // Clear send buffers:
    for (size_t i=0; i<outBuffers.size(); ++i) outBuffers[i].getBuffer().clear();
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop(); // MPI overhead
    #endif
@@ -559,7 +559,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateBoundaryCellParticles() {
       if (wrapper.valid() == false) {std::cerr << "'wrapper' is not valid!" << std::endl; allValid = false;}
       if (allValid == false) exit(1);
    #endif
-   
+
    #if PROFILE_LEVEL > 0
       profile::start("propagation",particlePropagationID);
    #endif
@@ -579,7 +579,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateBoundaryCellParticles() {
       #endif
 
       propagateCell(boundaryBlocks[c],coordinates,wrapper,N_particles);
-      
+
       if (sim->countPropagTime == true) {
 	 t_propag = std::max(0.0,MPI_Wtime() - t_propag);
 	 simClasses->pargrid.getCellWeights()[boundaryBlocks[c]] += t_propag;
@@ -606,13 +606,13 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateBoundaryCellParticles() {
 	 exit(1);
       }
       #endif
-      
+
       // Iterate over all blocks sent to neighbour process nbrHostID:
       int counter = 0;
       size_t blockCounter = 0;
       for (std::set<pargrid::CellID>::const_iterator block=it->second.begin(); block!=it->second.end(); ++block) {
 	 const pargrid::CellID blockLID = sendLIDs[processCounter][blockCounter];
-	 
+
 	 #ifndef NDEBUG
 	    if (blockLID >= simClasses->pargrid.getNumberOfAllCells()) {
 	       std::stringstream ss;
@@ -622,21 +622,21 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateBoundaryCellParticles() {
 	       exit(1);
 	    }
 	 #endif
-	 
+
 	 outBuffers[processCounter].getBlockSizes()[counter] = wrapper.size()[blockLID];
 	 ++counter;
 	 ++blockCounter;
-	 
+
 	 // Copy particles from remote cell to output buffer:
 	 std::vector<PARTICLE>& buffer = outBuffers[processCounter].getBuffer();
 	 for (pargrid::ArraySizetype p=0; p<wrapper.size()[blockLID]; ++p) {
 	    buffer.push_back( wrapper.data()[blockLID][p] );
 	 }
-	 
+
 	 // Clear remote cell:
 	 wrapper.resize(blockLID,0);
       }
-      
+
       // Post send for particles sent to process nbrHostID:
       if (outBufferCopy[processCounter].start() == false) {
 	 #ifndef NDEBUG
@@ -652,7 +652,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateBoundaryCellParticles() {
       profile::stop(); // particle step
       profile::stop(); // total time
    #endif
-   
+
    return success;
 }
 
@@ -668,7 +668,7 @@ void ParticleListSkeleton<SPECIES,PARTICLE>::propagateCell(pargrid::CellID cellI
 	 exit(1);      
       }
    #endif
-   
+
    // Call external propagator function:
    #if PROFILE_LEVEL > 1
       static int externalProp = -1;
@@ -676,11 +676,11 @@ void ParticleListSkeleton<SPECIES,PARTICLE>::propagateCell(pargrid::CellID cellI
    #endif
 
    propagator->propagateCell(cellID,particleDataID,coordinates+3*cellID,N_particles[cellID]);
-   
+
    #if PROFILE_LEVEL > 1
       profile::stop();
    #endif
-   
+
    // Loop over the particles again and check if particles changed cells. If a 
    // particle changed cell, it is either copied to the new cell or copied to 
    // a transfer buffer. The last condition occurs when the new cell is on another process.
@@ -694,7 +694,7 @@ void ParticleListSkeleton<SPECIES,PARTICLE>::propagateCell(pargrid::CellID cellI
 	 exit(0);
       }
    #endif
-   
+
    int current = 0;
    int end     = N_particles[cellID]-1;
    while (current <= end) {
@@ -740,7 +740,7 @@ void ParticleListSkeleton<SPECIES,PARTICLE>::propagateCell(pargrid::CellID cellI
    int N_copied    = wrapper.size(cellID)-N_particles[cellID];
    const int N_remaining = N_particles[cellID];
    N_particles[cellID]   = end+1;
-   
+
    if (N_copied > N_holes) {
       end = wrapper.size(cellID)-1;
       while (N_holes > 0) {
@@ -778,7 +778,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateInnerCellParticles() {
    #endif
 
    if (sim->meshRepartitioned == true) updatePartitioning();
-   
+
    // Create aliases to particle list and its size stored in cell it->first:
    const double* coordinates = reinterpret_cast<double*>(simClasses->pargrid.getUserData(Simulation::crdsDataID));
    pargrid::DataWrapper<PARTICLE> wrapper = simClasses->pargrid.getUserDataDynamic<PARTICLE>(particleDataID);
@@ -794,11 +794,11 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateInnerCellParticles() {
 	 exit(1);
       }
    #endif
-   
+
    #if PROFILE_LEVEL > 0
       profile::start("propagation",particlePropagationID);
    #endif
-   
+
    // Propagate particles on inner cells:
    Real t_propag = 0.0;
    for (size_t c=0; c<innerBlocks.size(); ++c) {
@@ -806,9 +806,9 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateInnerCellParticles() {
       if (sim->countPropagTime == true) {
 	 t_propag = MPI_Wtime();
       }
-      
+
       propagateCell(innerBlocks[c],coordinates,wrapper,N_particles);
-      
+
       if (sim->countPropagTime == true) {
 	 t_propag = std::max(0.0,MPI_Wtime() - t_propag);
 	 simClasses->pargrid.getCellWeights()[innerBlocks[c]] += t_propag;
@@ -841,12 +841,12 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateInnerCellParticles() {
       inBufferCopy[bufferCounter].wait();
       ++bufferCounter;
    }
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop(); // MPI wait recvs
       profile::start("MPI buffer copy",mpiBufferCopyID);
    #endif
-   
+
    // Copy particles from inbound buffers to cells' particle lists:
    bufferCounter = 0;
    for (std::set<pargrid::MPI_processID>::const_iterator it=neighbourProcesses.begin(); it!=neighbourProcesses.end(); ++it) {
@@ -866,7 +866,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::propagateInnerCellParticles() {
       }
       ++bufferCounter;
    }
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop(); // MPI buffer copy
       profile::stop(); // particle step
@@ -899,7 +899,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::updatePartitioning() {
 
    // Prevent multiple calls to updatePartitioning at same time step:
    if (meshVariablesUpdated == sim->timestep) return success;
-   
+
    // Reallocate MPI transfer buffers:
    const std::set<pargrid::MPI_processID>& neighbourProcesses = simClasses->pargrid.getNeighbourProcesses();
 
@@ -909,13 +909,13 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::updatePartitioning() {
 	std::vector<BUFFER> dummy2;
 	inBuffers.swap(dummy1);
 	outBuffers.swap(dummy2);
-	
+
 	std::vector<pargrid::CopyProtocolMPI<BUFFER> > dummyCopy1;
 	std::vector<pargrid::CopyProtocolMPI<BUFFER> > dummyCopy2;
 	inBufferCopy.swap(dummyCopy1);
 	inBufferCopy.swap(dummyCopy2);
      }
-   
+
    // Allocate new buffers:
    inBuffers.resize(neighbourProcesses.size());
    outBuffers.resize(neighbourProcesses.size());
@@ -932,7 +932,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::updatePartitioning() {
       recvLIDs.resize(neighbourProcesses.size());
       sendLIDs.resize(neighbourProcesses.size());
    }
-   
+
    // Reallocate N_particles array:
    size_t sum = 0;
    delete [] N_particles;
@@ -942,7 +942,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::updatePartitioning() {
       N_particles[block] = wrapper.size()[block];
       sum += wrapper.size()[block];
    }
-   
+
    size_t counter = 0;
    for (std::set<pargrid::MPI_processID>::const_iterator it=neighbourProcesses.begin(); it!=neighbourProcesses.end(); ++it) {
       #ifndef NDEBUG
@@ -964,24 +964,24 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::updatePartitioning() {
 
       const std::size_t N_recvs = simClasses->pargrid.getNumberOfReceives(sim->inverseStencilID,*it);
       inBuffers[counter].resize(N_recvs);
-      
+
       if (inBufferCopy[counter].set(&(inBuffers[counter]),false,sim->comm,*it) == false) {
 	 #ifndef NDEBUG
 	    simClasses->logger << "(PLIST SKELETON) ERROR: Failed to set source process rank" << std::endl << write;
 	 #endif
 	 success = false;
       }
-      
+
       const std::size_t N_sends = simClasses->pargrid.getNumberOfSends(sim->inverseStencilID,*it);
       outBuffers[counter].resize(N_sends);
-      
+
       if (outBufferCopy[counter].set(&(outBuffers[counter]),true,sim->comm,*it) == false) {
 	 #ifndef NDEBUG
 	    simClasses->logger << "(PLIST SKELETON) ERROR: Failed to set destination process rank" << std::endl << write;
 	 #endif
 	 success = false;
       }
-      
+
       // Recalculate vector recvLIDs, sendLIDs contents:
       if (LIDsCalculatedTimestep != sim->timestep) {
 	 const std::map<pargrid::MPI_processID,std::set<pargrid::CellID> >::const_iterator recvs
@@ -993,7 +993,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::updatePartitioning() {
 	    recvLIDs[counter][c] = cellLID;
 	    ++c;
 	 }
-	 
+
 	 const std::map<pargrid::MPI_processID,std::set<pargrid::CellID> >::const_iterator sends 
 	   = simClasses->pargrid.getSends(sim->inverseStencilID).find(*it);
 	 sendLIDs[counter].resize(sends->second.size());
@@ -1004,7 +1004,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::updatePartitioning() {
 	    ++c;
 	 }
       }
-      
+
       ++counter;
    }
    LIDsCalculatedTimestep = sim->timestep;
@@ -1016,17 +1016,17 @@ template<class SPECIES,class PARTICLE> inline
 bool ParticleListSkeleton<SPECIES,PARTICLE>::waitParticleSends() {
    bool success = true;
    if (getInitialized() == false) return false;
-   
+
    // Wait for all particle sends to complete:
    #ifdef PROFILE
       profile::start(profileName,totalTimeID);
       profile::start("Particle Step",particleTotalID);
       profile::start("MPI wait sends",mpiWaitSendsID);
    #endif
-   
+
    // Wait for sends:
    for (size_t i=0; i<outBufferCopy.size(); ++i) outBufferCopy[i].wait();
-   
+
    #ifdef PROFILE
       profile::stop(); // wait sends
       profile::stop(); // particle step
@@ -1039,16 +1039,16 @@ template<class SPECIES,class PARTICLE> inline
 bool ParticleListSkeleton<SPECIES,PARTICLE>::writeParticles(const std::string& spatMeshName) {
    bool success = true;
    if (initialized == false) return false;
-   
+
    #if PROFILE_LEVEL > 0
       profile::start(speciesName+" writing",particleWriteID);
    #endif
-   
+
    const size_t sum_particles = size();
    Real* buffer = new Real[sum_particles*3];
    const double* coordinates = getBlockCoordinateArray(*sim,*simClasses);
    pargrid::DataWrapper<PARTICLE> wrapper = simClasses->pargrid.getUserDataDynamic<PARTICLE>(particleDataID);   
-   
+
    size_t counter = 0;
    PARTICLE** particleLists = wrapper.data();
    for (size_t block=0; block<simClasses->pargrid.getNumberOfLocalCells(); ++block) {
@@ -1065,7 +1065,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::writeParticles(const std::string& s
 	 ++counter;
       }
    }
-   
+
    std::map<std::string,std::string> attribs;
    attribs["name"] = speciesName;
    attribs["type"] = vlsv::mesh::STRING_POINT;
@@ -1074,7 +1074,7 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::writeParticles(const std::string& s
       success = false;
    }
    delete [] buffer; buffer = NULL;
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop();
    #endif

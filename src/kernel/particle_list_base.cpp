@@ -37,12 +37,12 @@ ParticleListBase::ParticleListBase() {
    sim = NULL;
    simClasses = NULL;
    cr = NULL;
-   
+
    accumulator = NULL;
    boundaryCond = NULL;
    injector = NULL;
    propagator = NULL;
-   
+
    #ifdef PROFILE
       accumID = -1;
       accumArrayClears = -1;
@@ -73,7 +73,7 @@ ParticleListBase::~ParticleListBase() {
 bool ParticleListBase::finalize() {
    bool success = true;
    if (initialized == false) return success;
-   
+
    // Deallocate ParGrid static data arrays:
    if (particleDataID != pargrid::INVALID_DATAID) {
       if (simClasses->pargrid.removeUserData(particleDataID) == false) success = false;
@@ -90,10 +90,10 @@ bool ParticleListBase::finalize() {
    delete boundaryCond; boundaryCond = NULL;
    delete injector; injector = NULL;
    delete propagator; propagator = NULL;
-   
+
    // Free MPI datatype that was used to transfer the particles:
    if (particleType != MPI_DATATYPE_NULL) MPI_Type_free(&particleType);
-   
+
    initialized = false;
    return success;
 }

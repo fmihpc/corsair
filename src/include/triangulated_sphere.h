@@ -40,14 +40,14 @@ namespace ucdmesh {
 	 octahedron,       // Generate spherical surface starting from an octahedron
 	 tetrahedron       // Generate spherical surface starting from a tetrahedron
       };
-      
+
    } // namespace spheregenerator
-   
+
    bool createSphere(spheregenerator::Method method,int refinements,Real centroid[3],Real radius,
 		     std::vector<Node>& nodes,std::vector<TriangularFace>& faces,std::size_t& N_connections);
-   
+
    bool getFaceData(const std::vector<Node>& nodes,const std::vector<TriangularFace>& faces,std::vector<Real>& faceData);
-   
+
 } // namespace ucdmesh
-   
+
 #endif

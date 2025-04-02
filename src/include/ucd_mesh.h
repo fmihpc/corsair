@@ -31,7 +31,7 @@
  */
 
 namespace ucdmesh {
-   
+
    namespace facedataelement {
       enum Element {
 	 AREA,
@@ -41,11 +41,11 @@ namespace ucdmesh {
 	 SIZE
       };
    } // namespace facedataelement
-   
+
    /** Coordinates of a node on triangulated surface.*/
    struct Node {
       Node(Real x,Real y,Real z);
-      
+
       Real x; /**< Node's x-coordinate.*/
       Real y; /**< Node's y-coordinate.*/
       Real z; /**< Node's z-coordinate.*/
@@ -55,7 +55,7 @@ namespace ucdmesh {
     * that is required to write the ucd mesh to VLSV file(s).*/
    struct TriangularFace {
       TriangularFace(uint32_t cellType,uint32_t N_nodes,uint32_t node1,uint32_t node2,uint32_t node3);
-      
+
       uint32_t cellType; /**< Type of cell, one of the pre-defined types in vlsv_common.h file.*/
       uint32_t N_nodes;  /**< Number of nodes the cell is connected to.*/
       uint32_t node1;    /**< Index of first node.*/
@@ -79,7 +79,7 @@ namespace ucdmesh {
    };
 
    void refineFaces(std::vector<Node>& nodes,std::vector<TriangularFace>& faces);
-   
+
 } // namespace ucdmesh
-   
+
 #endif

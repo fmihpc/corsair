@@ -41,13 +41,13 @@ class PitchBinner: public DataOperator {
    std::string getName() const;
    bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);
    virtual bool writeData(const std::string& spatMeshName,const std::vector<ParticleListBase*>& particles);
-   
+
  private:
    bool divideByBinWidth;           /**< If true, value in each bin is divided by bin width
 				     * before data is written.*/
    int N_bins;                      /**< Number of bins used for [-1,+1] pitch interval.*/
    int pitchBinnerID;
-   
+
    int blockIndex(int i,int j,int k);
 };
 
@@ -75,7 +75,7 @@ bool PitchBinner<FIELD,SPECIES,PARTICLE>::initialize(ConfigReader& cr,Simulation
       return false;
    }
    bool success = true;
-   
+
    // Parse configuration file:
    std::string divide;
    cr.add("PitchBinner.bins","Number of bins used for [-1,+1] pitch interval (integer).",(int)9);
@@ -83,7 +83,7 @@ bool PitchBinner<FIELD,SPECIES,PARTICLE>::initialize(ConfigReader& cr,Simulation
    cr.parse();
    cr.get("PitchBinner.divide_by_bin_width",divide);
    cr.get("PitchBinner.bins",N_bins);
-   
+
    // Sanity check on values:
    if (N_bins < 2) {
       simClasses.logger << "(PITCHBINNER) ERROR: Parameter N_bins >= 1" << std::endl << write;
@@ -103,20 +103,20 @@ bool PitchBinner<FIELD,SPECIES,PARTICLE>::writeData(const std::string& spatMeshN
    if (getInitialized() == false) return false;
    profile::start("PitchBinner",pitchBinnerID);
    bool success = true;
-   
+
    // Allocate arrays which are written to output file:
    const Real pitch_min = -1.0;
    const Real pitch_max = +1.0;
    const Real d_pitch = (pitch_max - pitch_min) / N_bins;
-   
+
    // Get list of local cells. The list is ordered.
    pargrid::CellID N_localBlocks = simClasses->pargrid.getNumberOfLocalCells();
-   
+
    // Allocate arrays:
    Real** buffer = new Real*[N_bins];
    for (int i=0; i<N_bins; ++i) buffer[i] = new Real[N_localBlocks*block::SIZE];
    const double* blockCrds = getBlockCoordinateArray(*sim,*simClasses);
-   
+
    for (size_t species=0; species<particleLists.size(); ++species) {
       // This operator can only bin guiding center "GC" particles:
       pargrid::DataID particleDataID = pargrid::INVALID_DATAID;
@@ -126,11 +126,11 @@ bool PitchBinner<FIELD,SPECIES,PARTICLE>::writeData(const std::string& spatMeshN
       pargrid::DataWrapper<PARTICLE> wrapper = simClasses->pargrid.getUserDataDynamic<PARTICLE>(particleDataID);
       PARTICLE** particles = wrapper.data();
       const SPECIES* particleSpecies = reinterpret_cast<const SPECIES*>(particleLists[species]->getSpecies());
-      
+
       for (size_t block=0; block<N_localBlocks; ++block) {
 	 // Clear output arrays:
 	 for (int i=0; i<N_bins; ++i) for (int j=0; j<block::SIZE; ++j) buffer[i][block*block::SIZE+j] = 0.0;
-      
+
 	 Real cellSize[3];
 	 getBlockCellSize(*simClasses,*sim,block,cellSize);
 
@@ -142,41 +142,41 @@ bool PitchBinner<FIELD,SPECIES,PARTICLE>::writeData(const std::string& spatMeshN
 	    for (int j=0; j<3; ++j) pos[j] = blockCrds[3*block+j] + particles[block][p].state[j];
 	    FIELD::getFields(block,sim->t,pos,E,B);
 	    const Real B_mag = vectorMagnitude<3>(B);
-	    
+
 	    // Calculate pitch and accumulate to output arrays:
 	    //const Real V_gyro_2 = 2.0*particles[block][p].state[GC::MU]*B_mag/particleLists[species]->getSpecies().m;
 	    const Real V_gyro_2 = 2.0*particles[block][p].state[GC::MU]*B_mag/particleSpecies->m;
 	    const Real V_star   = sqrt(particles[block][p].state[GC::VPAR]*particles[block][p].state[GC::VPAR] + V_gyro_2);
 	    const Real pitch    = particles[block][p].state[GC::VPAR] / V_star;
-	    
+
 	    int bin = static_cast<int>(floor((pitch - pitch_min) / d_pitch));
 	    if (bin < 0) bin = 0;
 	    else if (bin > N_bins-1) bin = N_bins-1;
-	    
+
 	    // Calculate index into cells in block:
 	    const int i = static_cast<int>(floor(particles[block][p].state[GC::X]/cellSize[0]));
 	    const int j = static_cast<int>(floor(particles[block][p].state[GC::Y]/cellSize[1]));
 	    const int k = static_cast<int>(floor(particles[block][p].state[GC::Z]/cellSize[2]));
-	    
+
 	    buffer[bin][block*block::SIZE+blockIndex(i,j,k)] += particles[block][p].state[GC::WEIGHT];
 	 }
-	 
+
 	 // Divide values by cell size to make units 1/m^3:
 	 Real factor = 1.0 / (cellSize[0]*cellSize[1]*cellSize[2]);
-	 
+
 	 // Divide by bin width if necessary:
 	 if (divideByBinWidth == true) {
 	    factor /= d_pitch;
 	 }
-	 
+
 	 for (int i=0; i<N_bins; ++i) for (int j=0; j<block::SIZE; ++j) buffer[i][block*block::SIZE+j] *= factor;
       }
-      
+
       // Write pitch arrays to file:
       for (int i=0; i<N_bins; ++i) {
 	 std::stringstream ss;
 	 ss << "bin" << i;
-	 
+
 	 std::map<std::string,std::string> attributes;
 	 attributes["mesh"] = spatMeshName;
 	 attributes["type"] = "celldata";
@@ -196,5 +196,5 @@ bool PitchBinner<FIELD,SPECIES,PARTICLE>::writeData(const std::string& spatMeshN
    profile::stop();
    return success;
 }
-   
+
 #endif

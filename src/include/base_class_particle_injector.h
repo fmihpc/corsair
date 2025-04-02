@@ -33,17 +33,17 @@ class ParticleInjectorBase {
  public:
    /** Default constructor (empty).*/
    ParticleInjectorBase();
-   
+
    /** Default virtual destructor (empty).*/
    virtual ~ParticleInjectorBase();
-   
+
    /** Add all configuration file items read by this class to given config file reader.
     * @param cr Configuration file reader.
     * @param regionName Name of configuration file region that contains 
     * parameters for this particle injector.
     * @return If true, configuration file items were added successfully.*/
    virtual bool addConfigFileItems(ConfigReader& cr,const std::string& regionName) = 0;
-   
+
    /** Finalize class. This function should deallocate all internal memory.
     * @return If true, class was finalized successfully.*/
    virtual bool finalize() = 0;
@@ -51,7 +51,7 @@ class ParticleInjectorBase {
    virtual Real getMaximumSpeed();
    virtual void setType(std::string type);
    virtual std::string getType();
-   
+
    /** Initialize particle injector. All inheriting classes should call base class initialize
     * function to set member variables ParticleInjectorBase::sim and ParticleInjectorBase::simClasses.
     * @param sim Generic simulation control variables.
@@ -62,7 +62,7 @@ class ParticleInjectorBase {
     * @return If true, class was successfully initialized and is ready for use.*/
    virtual bool initialize(Simulation& sim,SimulationClasses& simClasses,ConfigReader& cr,
 			   const std::string& regionName,const ParticleListBase* plist);
-   
+
    /** Inject new particles to mesh.
     * @param particleDataID Data ID of ParGrid dynamic array where new particles
     * should be added.
@@ -70,7 +70,7 @@ class ParticleInjectorBase {
     * Add the number of injected particles per cell to this array.
     * @return If true, no errors occurred in particle injection.*/
    virtual bool inject(pargrid::DataID particleDataID,unsigned int* N_particles) = 0;
-   
+
  protected:
    Simulation* sim;               /**< Generic simulation control variables.*/
    SimulationClasses* simClasses; /**< Generic simulation classes.*/

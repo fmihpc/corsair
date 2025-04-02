@@ -11,7 +11,7 @@
 #include <particle_list_base.h>
 
 namespace corsair {
-   
+
    struct ObjectWrapper {
       ConfigReader configReader;
       DataOperatorContainer dataOperatorContainer;
@@ -22,7 +22,7 @@ namespace corsair {
    };
 
    ObjectWrapper& getObjectWrapper();
-      
+
    namespace compuload {
       enum Items {
 	 SECONDS_PER_CELL,
@@ -30,16 +30,16 @@ namespace corsair {
 	 SIZE
       };
    }
-   
+
    struct ComputationalLoad {
       Real loadAvg[compuload::SIZE];
       Real loadMin[compuload::SIZE];
       Real loadMax[compuload::SIZE];
       Real ratios[compuload::SIZE];
    };
-   
+
    void evaluateComputationalLoad(corsair::ObjectWrapper& owrapper,corsair::ComputationalLoad& load);
-   
+
 } // namespace kernel
 
 #endif

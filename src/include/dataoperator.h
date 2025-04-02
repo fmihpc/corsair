@@ -32,13 +32,13 @@ class DataOperator {
  public:
    DataOperator();
    virtual ~DataOperator();
-   
+
    virtual bool finalize() = 0;
    bool getInitialized() const {return initialized;}
    virtual std::string getName() const = 0;
    virtual bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);
    virtual bool writeData(const std::string& spatMeshName,const std::vector<ParticleListBase*>& particles) = 0;
-   
+
  protected:
    bool initialized;                     /**< If true, derived DataOperator initialized successfully.*/
    Simulation* sim;                      /**< Pointer to generic simulation variables.*/

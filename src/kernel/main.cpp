@@ -317,7 +317,7 @@ int main(int argn,char* args[]) {
          delete builder; builder = NULL;
          objectWrapper.sim.restartTimestep = objectWrapper.sim.timestep;
       }
-      
+
       // Regular GridBuilder is always created and initialized:
       builder = objectWrapper.objectFactories.gridBuilders.create(gridBuilderName);
       if (builder == NULL) {
@@ -489,7 +489,7 @@ int main(int argn,char* args[]) {
       objectWrapper.sim.countPropagTime = false;
       objectWrapper.simClasses.pargrid.setPartitioningMode(pargrid::repartition);
 
-      if(dataSaveInitial == "yes") {
+      if (dataSaveInitial == "yes") {
       #if PROFILE_LEVEL > 0
 	  profile::start("corsair/save",profileSaveID);
       #endif
@@ -527,7 +527,7 @@ int main(int argn,char* args[]) {
 	 if (objectWrapper.sim.timestep < dataSaveFirstTimesteps) {
 	    objectWrapper.sim.atDataSaveStep = true;
 	 }
-	 if(objectWrapper.sim.atDataSaveStep == true) {
+	 if (objectWrapper.sim.atDataSaveStep == true) {
 	    objectWrapper.simClasses.logger << "(MAIN) At data save step (time step = " << objectWrapper.sim.timestep << ", time = " << objectWrapper.sim.t << ")" << endl << write;
 	 }
 
@@ -559,7 +559,7 @@ int main(int argn,char* args[]) {
          ++objectWrapper.sim.timestep;
          objectWrapper.sim.t += objectWrapper.sim.dt;
 
-	 if(continueSimulation(objectWrapper.sim) == false) {
+	 if (continueSimulation(objectWrapper.sim) == false) {
 	    objectWrapper.simClasses.logger << "(MAIN) At final time step (time step = " << objectWrapper.sim.timestep << ", time = " << objectWrapper.sim.t << ")" << endl << write;
 	 }
 

@@ -51,7 +51,7 @@ bool ParticleOperator::writeData(const std::string& spatMeshName,const std::vect
       /* const size_t N_particles = particles[species].size();
       Real* buffer = new Real[N_particles*3];
       const double* coordinates = getBlockCoordinateArray(*sim,*simClasses);
-      
+
       counter = 0;
       const unsigned int* sizes = NULL;
       const Particle** particleLists = NULL;
@@ -64,7 +64,7 @@ bool ParticleOperator::writeData(const std::string& spatMeshName,const std::vect
 	    ++counter;
 	 }
       }
-      
+
       map<string,string> attribs;
       attribs["name"] = particles[species].name();
       attribs["type"] = VLSV::MESH_POINT;
@@ -74,7 +74,7 @@ bool ParticleOperator::writeData(const std::string& spatMeshName,const std::vect
       }
       delete [] buffer; buffer = NULL;*/
    }
-   
+
    #ifdef PROFILE
       profile::stop();
    #endif

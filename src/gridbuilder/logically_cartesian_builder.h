@@ -27,9 +27,9 @@ class LogicallyCartesianBuilder: public GridBuilder {
  public:
    LogicallyCartesianBuilder();
    virtual ~LogicallyCartesianBuilder();
-   
+
    virtual bool defineParameters(ConfigReader& cr);
-   
+
    virtual bool finalize();
    virtual bool getCellIndices(unsigned int N_cells,const builder::ID* const globalIDs,builder::ID*& indices);
    virtual bool getCellInfo(builder::ID cellOffsetStart,builder::ID cellOffsetEnd,builder::ID* cellIDs,unsigned char* N_neighbours);
@@ -41,11 +41,11 @@ class LogicallyCartesianBuilder: public GridBuilder {
    virtual bool initialize(Simulation& sim,SimulationClasses& simClasses,ConfigReader& cr);
 
    virtual bool writeMesh(Simulation& sim,SimulationClasses& simClasses,const std::string& meshName,bool meshWrite);
-   
+
  protected:
    bool initialized;       /**< If true, LogicallyCartesianBuilder initialized correctly.*/
    const std::string prefix;
-   
+
    bool calcCellVolumes;   /**< If true, calculate cell volumes and insert them to ParGrid.*/
 
    enum Geometry {
@@ -53,9 +53,9 @@ class LogicallyCartesianBuilder: public GridBuilder {
       Cylindrical,
       Spherical
    };
-   
+
    Geometry geometry;
-   
+
    std::string name;
    builder::ID xCells;     /**< Number of cells in x-direction.*/
    builder::ID yCells;     /**< Number of cells in y-direction.*/
@@ -78,9 +78,9 @@ class LogicallyCartesianBuilder: public GridBuilder {
    std::string xUnits;     /**< Unit of measure for x-coordinate, defaults to "".*/
    std::string yUnits;     /**< Unit of measure for y-coordinate, defaults to "".*/
    std::string zUnits;     /**< Unit of measure for z-coordinate, defaults to "".*/
-  
+
    Simulation* sim;
-   
+
    void calculateCellIndices(builder::ID cellID,builder::ID& i,builder::ID& j,builder::ID& k);
    virtual bool calculateBlockSizes();
    virtual bool calculateCellSizes();

@@ -66,7 +66,7 @@ bool RestartBuilder::getCellInfo(builder::ID cellOffsetStart,builder::ID cellOff
    uint64_t vectorSize;
    uint64_t dataSize;
    vlsv::datatype::type datatype;
-   
+
    list<pair<string,string> > attribs;
    attribs.push_back(make_pair("name","CellID"));
    attribs.push_back(make_pair("mesh",meshName));
@@ -83,7 +83,7 @@ bool RestartBuilder::getCellInfo(builder::ID cellOffsetStart,builder::ID cellOff
       success = false;
    }
    if (success == false) return success;
-   
+
    char* buffer = new char[(cellOffsetEnd-cellOffsetStart)*vectorSize*dataSize];   
    if (vlsvReader->readArray("VARIABLE",attribs,cellOffsetStart,cellOffsetEnd-cellOffsetStart,buffer) == false) {
       simClasses->logger << "(RESTART BUILDER) ERROR: Failed to read cell IDs!" << endl << write;
@@ -116,12 +116,12 @@ bool RestartBuilder::getCellNeighbours(builder::ID cellOffsetStart,builder::ID c
 				       unsigned char* N_neighbours,builder::ID* neighbourIDs,unsigned char* neighbourTypeIDs) {
    if (initialized == false) return false;
    bool success = true;
-   
+
    uint64_t arraySize;
    uint64_t vectorSize;
    uint64_t dataSize;
    vlsv::datatype::type datatype;
-   
+
    list<pair<string,string> > attribs;
    attribs.push_back(make_pair("name","NbrGlobalID"));
    attribs.push_back(make_pair("mesh",meshName));
@@ -138,7 +138,7 @@ bool RestartBuilder::getCellNeighbours(builder::ID cellOffsetStart,builder::ID c
       success = false;
    }
    if (success == false) return success;
-   
+
    char* buffer = new char[(cellOffsetEnd-cellOffsetStart)*vectorSize*dataSize];
    if (vlsvReader->readArray("VARIABLE",attribs,cellOffsetStart,cellOffsetEnd-cellOffsetStart,buffer) == false) {
       simClasses->logger << "(RESTART BUILDER) ERROR: Failed to read cell neighbour IDs!" << endl << write;
@@ -164,7 +164,7 @@ bool RestartBuilder::getCellNeighbours(builder::ID cellOffsetStart,builder::ID c
       }
    }
    delete [] buffer; buffer = NULL;
-   
+
    for (builder::ID i=0; i<cellOffsetEnd-cellOffsetStart; ++i) {
       int counter = 0;
       for (uint64_t j=0; j<pargrid::N_neighbours; ++j) {
@@ -190,12 +190,12 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
       return false;
    }
    bool success = true;
-   
+
    uint64_t arraySize;
    uint64_t vectorSize;
    uint64_t dataSize;
    vlsv::datatype::type datatype;
-   
+
    list<pair<string,string> > attribs;
    attribs.push_back(make_pair("mesh",meshName));
    attribs.push_back(make_pair("name","cell_coordinates"));
@@ -267,7 +267,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
 	 success = false;
 	 break;
       }
-      
+
       string datatypeString;
       switch (datatype) {
        case vlsv::datatype::INT:
@@ -284,7 +284,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
 	 simClasses->logger << "(RESTART BUILDER) ERROR: Unsupported datatype in static array" << endl << write;
 	 break;
       }
-      
+
       // Create ParGrid array:
       pargrid::DataID dataID = simClasses->pargrid.addUserData(*it,vectorSize,datatypeString,dataSize,false);
       if (dataID == pargrid::INVALID_DATAID) {
@@ -292,7 +292,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
 	 simClasses->logger << "(RESTART BUILDER) ERROR: Failed to add static data array to ParGrid" << endl << write;
 	 break;
       }
-      
+
       // Copy contents from file to array. Here we can just request 
       // a char pointer to the array since we are doing a byte copy of values:
       char* arrayPtr = simClasses->pargrid.getUserDataStatic<char>(dataID);
@@ -348,7 +348,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
 	 success = false; break;
       }
       pargrid::DataWrapper<char> wrapper = simClasses->pargrid.getUserDataDynamic<char>(dataID);
-      
+
       // Get sizes of dynamic array elements:
       attribs.clear();
       attribs.push_back(make_pair("name",*it));
@@ -365,14 +365,14 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
 	 simClasses->logger << "(RESTART BUILDER) ERROR: Dynamic data '" << *it << "' size array has unsupported datatype!" << endl << write;
 	 success = false; break;
       }
-      
+
       // Read dynamic data size array:
       char* buffer = new char[arraySize*vectorSize*dataSize];
       if (vlsvReader->readArray("SIZE(DYNAMIC)",attribs,cellOffsetStart,cellOffsetEnd-cellOffsetStart,buffer) == false) {
 	 simClasses->logger << "(RESTART BUILDER) ERROR: Failed to read dynamic array data from file" << endl << write;
 	 success = false;
       }
-      
+
       // Actual dynamic data is written as a consecutive array in VLSV file. Each process should
       // reads its portion of that array but we do not know the correct file offsets yet.
       // Here we compute them:
@@ -403,7 +403,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
 	   elementSum += ptr64[block];
 	 break;
       }
-      
+
       // Collect element sums to master process who then computes correct offsets for everyone:
       uint64_t* globalOffsets = NULL;
       if (sim->mpiRank == sim->MASTER_RANK) globalOffsets = new uint64_t[sim->mpiProcesses];
@@ -418,7 +418,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
       }
       MPI_Scatter(globalOffsets,1,MPI_Type<uint64_t>(),&elementSum,1,MPI_Type<uint64_t>(),sim->MASTER_RANK,sim->comm);
       delete [] globalOffsets; globalOffsets = NULL;
-      
+
       // Resize dynamic array elements to correct sizes and add multiread units to 
       // vlsv::ParallelReader for reading the data from VLSV file to memory:
       char* arrayPtr = NULL;
@@ -464,7 +464,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
          break;
       }
       delete [] buffer; buffer = NULL;
-      
+
       if (vlsvReader->endMultiread(elementSum) == false) {
          simClasses->logger << "(RESTART BUILDER) ERROR: Failed to read dynamic array '" << *it << "' !" << endl << write;
          success = false; break;
@@ -476,7 +476,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
 bool RestartBuilder::getNumberOfCells(builder::ID& N_cells) {
    if (initialized == false) return initialized;
    bool success = true;
-   
+
    N_cells = 0;
    map<string,string> attribsOut;
    list<pair<string,string> > attribsIn;
@@ -502,7 +502,7 @@ bool RestartBuilder::initialize(Simulation& sim,SimulationClasses& simClasses,Co
    this->sim = &sim;
    this->simClasses = &simClasses;
    simClasses.logger << "(RESTART BUILDER) Starting initialization." << endl;
-   
+
    string restartFileName;
    const string regionName = "Restart";
    cr.add(regionName+".filename","Name of the restart file (string).",string(""));
@@ -514,7 +514,7 @@ bool RestartBuilder::initialize(Simulation& sim,SimulationClasses& simClasses,Co
       simClasses.logger << "\t Failed to open file '" << restartFileName << "' for restarting!" << endl;
       initialized = false;
    }
-   
+
    // Attempt to read mesh name:
    map<string,string> attribsOut;
    list<pair<string,string> > attribsIn;
@@ -531,7 +531,7 @@ bool RestartBuilder::initialize(Simulation& sim,SimulationClasses& simClasses,Co
 	 meshName = attribsOut["name"];
       }
    }
-   if(initialized == true) {simClasses.logger << "\t Initialization successful." << endl; }
+   if (initialized == true) {simClasses.logger << "\t Initialization successful." << endl; }
    simClasses.logger << write;
    return initialized;
 }

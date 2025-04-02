@@ -28,7 +28,7 @@ class RestartBuilder: public GridBuilder {
  public:
    RestartBuilder();
    ~RestartBuilder();
-   
+
    bool finalize();
    bool getCellIndices(unsigned int N_cells,const builder::ID* const cellIDs,builder::ID*& indices);
    bool getCellInfo(builder::ID cellOffsetStart,builder::ID cellOffsetEnd,
@@ -39,7 +39,7 @@ class RestartBuilder: public GridBuilder {
    bool getMeshBoundingBox(Real& x_min,Real& y_min,Real& z_min,Real& dx0,Real& dy0,Real& dz0);
    bool getNumberOfCells(builder::ID& N_cells);
    bool initialize(Simulation& sim,SimulationClasses& simClasses,ConfigReader& cr);
-   
+
  private:
    bool initialized;                /**< If true, RestartBuilder has initialized correctly.*/
    std::string meshName;            /**< Name of the mesh RestartBuilder should re-create.*/

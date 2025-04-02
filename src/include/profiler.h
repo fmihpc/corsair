@@ -27,7 +27,7 @@ namespace profile {
    void print(MPI_Comm comm,int masterRank);
    void start(const std::string& name,int& nameID);
    void stop();
-   
+
    #ifndef PROFILE
    inline void print(MPI_Comm comm,int masterRank) { }
    inline void start(const std::string& name,int& nameID) { }

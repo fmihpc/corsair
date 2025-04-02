@@ -69,13 +69,13 @@ bool MPIFile::resetPosition() {
 /** Constructor for class MPIFile. The constructor is empty.
  */
 MPIFile::MPIFile() {
-   
+
 }
 
 /** Destructor for class MPIFile. The destructor is empty.
  */
 MPIFile::~MPIFile() {
-   
+
 }
 
 

@@ -42,13 +42,13 @@ struct Simulation {
 
    bool finalize();
    bool initialize(int argn,char** args);
-   
+
    int argn;                               /**< Number of command line arguments.*/
    char** args;                            /**< Command line arguments.*/
    bool runTests;
    bool initializing;                      /**< If true, simulation is still initializing, i.e., the main 
 					    * propagation loop hasn't started yet.*/
-   
+
    // ******************************************** //
    // ***** GENERIC VARIABLES RELATED TO MPI ***** //
    // ******************************************** //
@@ -74,7 +74,7 @@ struct Simulation {
    // *************************************************** //
    // ***** VARIABLES RELATED TO SIMULATION RESTART ***** //
    // *************************************************** //
-   
+
    bool restarted;                         /**< If true, simulation was restarted.*/
    unsigned int restartTimestep;           /**< Time step when simulation was restarted (if applicable).*/
    unsigned int restartWriteInterval;      /**< Interval, in time steps, between restart file writes.*/
@@ -82,11 +82,11 @@ struct Simulation {
    std::size_t restartMajorInterval;       /**< Major interval, measured in timesteps, at which restart files are always kept.
 					    * If this equals to zero value then all restart files are tested for deletion.*/
    std::size_t restartMinorFileAmount;     /**< Number of most recent restart files that are always kept.*/
-   
+
    // *********************************************** //
    // ***** VARIABLES RELATED TO BALANCING LOAD ***** //
    // *********************************************** //
-   
+
    bool countPropagTime;                   /**< If true, propagators should measure propagation time of each local cell.*/
    int repartitionCheckInterval;           /**< Interval, in number of time steps, when repartitioning is done.*/
    bool meshRepartitioned;                 /**< If true, mesh has been repartitioned since last time step 
@@ -100,12 +100,12 @@ struct Simulation {
    // ************************************************ //
    // ***** VARIABLES RELATED TO SIMULATION MESH ***** //
    // ************************************************ //
-   
+
    vlsv::geometry::type meshGeometry;      /**< Used coordinate system. Set by GridBuilder.*/
    unsigned int x_blocks;                  /**< Number of mesh blocks in x-direction. Value is set by a GridBuilder class.*/
    unsigned int y_blocks;                  /**< Number of mesh blocks in y-direction. Value is set by a GridBuilder class.*/
    unsigned int z_blocks;                  /**< Number of mesh blocks in z-direction. Value is set by a GridBuilder class.*/
-   
+
    bool dx_uniform;                        /**< If true, cell spacing in x-direction is constant.
 					    Set to 'true' in constructor. Value may be re-set by a GridBuilder class.*/
    bool dy_uniform;                        /**< If true, cell spacing in y-direction is constant.
@@ -158,7 +158,7 @@ struct Simulation {
 					    * If dz_uniform equals true only dz_cell[0] is valid, otherwise the 
 					    * size of array equals the number of cells (not blocks) in z-direction.
 					    * This array is created by a GridBuilder class and deleted in destructor.*/
-   
+
    Real dt;                                /**< Current global simulation time step.*/
    Real t;                                 /**< Current simulation time.*/
    uint32_t timestep;                      /**< Current simulation timestep.*/
@@ -168,14 +168,14 @@ struct Simulation {
    uint32_t maximumTimesteps;              /**< Simulation exits after this many timesteps have been taken. A negative value
 					    * indicates that maximumTimesteps is not used as an end condition.
 					    * maximumTime and maximumTimesteps cannot both have negative value(s).*/
-   
+
    static pargrid::DataID crdsDataID;             /**< ParGrid data ID associated with cell coordinate array.*/
    static pargrid::StencilID crdsStencilID;       /**< ID of ParGrid Stencil that is used to sync cell coordinate array.*/
 
    pargrid::StencilID defaultStencilID;           /**< ID of ParGrid default Stencil, equals to pargrid::DEFAULT_STENCIL.*/
    pargrid::StencilID inverseStencilID;           /**< ID of inverse of ParGrid default Stencil. This Stencil is 
 						   * allocated in Corsair main.cpp and is used by particle lists.*/
-   
+
  private:
    Simulation(const Simulation& s);
 };

@@ -29,7 +29,7 @@ using namespace std;
 static const uint32_t maxHash = 65535;
 
 namespace ucdmesh {
-   
+
    /** Test if two edges are equal.
     * This function is used in triangular face refinement algorithm where an edge, 
     * defined by indices of the Nodes it connects to, is refined unless it has 
@@ -51,7 +51,7 @@ namespace ucdmesh {
       uint64_t result = 0;
       uint64_t tmp = nodeIndices.first % maxHash;
       result = (result | tmp);
-      
+
       tmp = nodeIndices.second % maxHash;
       return (result | (tmp << 16));
    }
@@ -62,7 +62,7 @@ namespace ucdmesh {
     * @param y Node's y-coordinate.
     * @param z Node's z-coordinate.*/
    Node::Node(Real x,Real y,Real z): x(x),y(y),z(z) { }
-   
+
    /** Contructor for a triangulare face element.
     * @param cellType Cell type, one of the values defined in vlsv_common.h header (vlsv::celltype::TRIANGLE for triangle).
     * @param N_nodes Number of nodes this face element connects to (three for triangular).
@@ -81,16 +81,16 @@ namespace ucdmesh {
       // indices of Nodes it connects to, this is the pair<uint32_t,uint32_t> template parameter.
       // Second template parameter (int) is the index of the new Node, i.e., its position in vector nodes.
       unordered_map<pair<uint32_t,uint32_t>,int,EdgeHash,EdgesEqual> newNodeIndices;
-      
+
       // Iterator to unordered_map newNodeIndices. Algorithm below attempts to refine 
       // all edges of each triangle, and sets this iterator point to the new Node. In 
       // case the new Node already exists, iterator will point to that.
       pair<unordered_map<pair<uint32_t,uint32_t>,int,EdgeHash,EdgesEqual>::iterator,bool> result;
-      
+
       const uint32_t invalidValue = numeric_limits<uint32_t>::max();
       uint32_t newNode1,newNode2,newNode3;
       const size_t N_existingTriangles = faces.size();
-      
+
       for (size_t face=0; face<N_existingTriangles; ++face) {
 	 const uint32_t node1 = faces[face].node1;
 	 const uint32_t node2 = faces[face].node2;
@@ -107,7 +107,7 @@ namespace ucdmesh {
 	 } else {
 	    newNode1 = result.first->second;
 	 }
-	 
+
 	 result = newNodeIndices.insert(make_pair(make_pair(min(node2,node3),max(node2,node3)),invalidValue));
 	 if (result.second == true) {
 	    newNode2 = nodes.size();
@@ -118,7 +118,7 @@ namespace ucdmesh {
 	 } else {
 	    newNode2 = result.first->second;
 	 }
-	 
+
 	 result = newNodeIndices.insert(make_pair(make_pair(min(node3,node1),max(node3,node1)),invalidValue));
 	 if (result.second == true) {
 	    newNode3 = nodes.size();
@@ -129,7 +129,7 @@ namespace ucdmesh {
 	 } else {
 	    newNode3 = result.first->second;
 	 }
-	 
+
 	 // Insert new faces:
 	 faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,newNode1,node2,newNode2));
 	 faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,newNode2,node3,newNode3));
@@ -138,5 +138,5 @@ namespace ucdmesh {
 	 faces[face].node3 = newNode3;
       }
    }
-      
+
 } // namespace ucdmesh

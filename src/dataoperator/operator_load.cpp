@@ -47,26 +47,26 @@ bool LoadOP::initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simC
 bool LoadOP::writeData(const std::string& spatMeshName,const std::vector<ParticleListBase*>& particles) {
    if (getInitialized() == false) return false;
    profile::start("Load",profileID);
-   
+
    const string arrayType = "celldata";
    const uint64_t arraySize = simClasses->pargrid.getNumberOfLocalCells()*block::SIZE;
    const uint64_t vectorSize = 1;
-   
+
    // Allocate output buffer:
    vector<Real> weights(arraySize);
-   
+
    // Calculate computational load for each block and store values to buffer:
    for (pargrid::CellID block=0; block<simClasses->pargrid.getNumberOfLocalCells(); ++block) {
       const Real weight = simClasses->pargrid.getCellWeights()[block];
       for (int i=0; i<block::SIZE; ++i) weights[block*block::SIZE+i] = weight;
    }
-   
+
    // Write buffer to output file:
    map<string,string> attributes;
    attributes["name"] = getName();
    attributes["mesh"] = spatMeshName;
    attributes["type"] = arrayType;
-   
+
    bool success = true;
    if (simClasses->vlsv.writeArray("VARIABLE",attributes,arraySize,vectorSize,&(weights[0])) == false) success = false;
    profile::stop();

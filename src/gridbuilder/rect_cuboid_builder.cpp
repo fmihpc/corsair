@@ -35,7 +35,7 @@ RectCuboidBuilder::RectCuboidBuilder(): GridBuilder() {
 }
 
 RectCuboidBuilder::~RectCuboidBuilder() {
-   
+
 }
 
 void RectCuboidBuilder::calculateCellIndices(builder::ID cellID,builder::ID& i,builder::ID& j,builder::ID& k) {
@@ -104,7 +104,7 @@ unsigned char RectCuboidBuilder::countNeighbours(builder::ID i,builder::ID j,bui
 
 bool RectCuboidBuilder::finalize() {
    bool success = true;
- 
+
    return success;
 }
 
@@ -119,7 +119,7 @@ bool RectCuboidBuilder::getCellIndices(unsigned int N_cells,const builder::ID* c
    for (builder::ID c=0; c<N_cells; ++c) {
       const builder::ID cellID = cellIDs[c];
       calculateCellIndices(cellID,i,j,k);
-      
+
       indices[c*3+0] = i;
       indices[c*3+1] = j;
       indices[c*3+2] = k;
@@ -131,7 +131,7 @@ bool RectCuboidBuilder::getCellInfo(builder::ID cellOffsetStart,builder::ID cell
 				    builder::ID* cellIDs,unsigned char* N_neighbours) {
    if (initialized == false) return false;
    bool success = true;
-   
+
    builder::ID i,j,k;
    const builder::ID N_cells = cellOffsetEnd-cellOffsetStart;
    for (builder::ID c=0; c<N_cells; ++c) {
@@ -147,20 +147,20 @@ bool RectCuboidBuilder::getCellNeighbours(builder::ID cellOffsetStart,builder::I
 					  unsigned char* N_neighbours,builder::ID* neighbourIDs,unsigned char* neighbourTypeIDs) {
    if (initialized == false) return false;
    bool success = true;
-   
+
    builder::ID counter = 0;
    builder::ID I,J,K;
    const builder::ID N_cells = cellOffsetEnd-cellOffsetStart;
    for (builder::ID c=0; c<N_cells; ++c) {
       const builder::ID cellID = cellIDs[c];
       calculateCellIndices(cellID,I,J,K);
-      
+
       // Add neighbour IDs that exist in a 3x3x3 cube centered at this cell:
       for (int i=-1; i<2; ++i) for (int j=-1; j<2; ++j) for (int k=-1; k<2; ++k) {
 	 if (i == 0 && (j == 0 && k == 0)) continue;
 	 builder::ID nbrID     = calculateNeighbourID(I,J,K,i,j,k);
 	 if (nbrID == numeric_limits<builder::ID>::max()) continue;
-	 
+
 	 const unsigned char nbrTypeID = calculateNeighbourTypeID(i,j,k);	 
 	 neighbourIDs[counter]     = nbrID;
 	 neighbourTypeIDs[counter] = nbrTypeID;
@@ -174,13 +174,13 @@ bool RectCuboidBuilder::getCellNeighbours(builder::ID cellOffsetStart,builder::I
 bool RectCuboidBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cellOffsetEnd,builder::ID* cellIDs,double* coordinates) {
    if (initialized == false) return false;
    bool success = true;
-   
+
    builder::ID i,j,k;
    const builder::ID N_cells = cellOffsetEnd-cellOffsetStart;
    for (builder::ID cell=0; cell<N_cells; ++cell) {
       builder::ID cellID = cellIDs[cell];
       calculateCellIndices(cellID,i,j,k);
-      
+
       coordinates[3*cell+0] = x_min + i*dx;
       coordinates[3*cell+1] = y_min + j*dy;
       coordinates[3*cell+2] = z_min + k*dz;
@@ -239,7 +239,7 @@ bool RectCuboidBuilder::initialize(Simulation& sim,SimulationClasses& simClasses
    cr.get("RectCuboid.x_periodic",xPeriodic);
    cr.get("RectCuboid.y_periodic",yPeriodic);
    cr.get("RectCuboid.z_periodic",zPeriodic);
-   
+
    if (x_min != x_min) success = false;
    if (y_min != y_min) success = false;
    if (z_min != z_min) success = false;
@@ -264,7 +264,7 @@ bool RectCuboidBuilder::initialize(Simulation& sim,SimulationClasses& simClasses
    sim.dx_block[0] = dx;
    sim.dy_block[0] = dy;
    sim.dz_block[0] = dz;
-   
+
    // Calculate cell sizes:
    sim.dx_cell = new Real[1];
    sim.dy_cell = new Real[1];
@@ -274,7 +274,7 @@ bool RectCuboidBuilder::initialize(Simulation& sim,SimulationClasses& simClasses
    sim.dz_cell[0] = sim.dz_block[0] / block::WIDTH_Z;
 
    sim.meshGeometry = vlsv::geometry::CARTESIAN;
-   
+
    sim.x_periodic = periodic_x;
    sim.y_periodic = periodic_y;
    sim.z_periodic = periodic_z;
@@ -285,7 +285,7 @@ bool RectCuboidBuilder::initialize(Simulation& sim,SimulationClasses& simClasses
    sim.y_max = y_max;
    sim.z_min = z_min;
    sim.z_max = z_max;
-   
+
    if (success == true) { simClasses.logger << "\t Initialization successful." << endl << write; }
    else { simClasses.logger << "\t Initialization failed." << endl << write; }
    initialized = success;
