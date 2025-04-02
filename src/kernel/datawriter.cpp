@@ -43,7 +43,6 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    #if PROFILE_LEVEL > 0
       profile::start("File Open",fileOpenID);
    #endif
-   simClasses.logger << "(DATAWRITER) Starting to write simulation data (time step = "  << sim.timestep << ", time = " << sim.t << ")" << endl;
 
    // Create name for output file:
    stringstream ss;
@@ -51,6 +50,8 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    ss << "state" << setw(8) << sim.timestep << ".vlsv";
    string fileName;
    ss >> fileName;
+
+   simClasses.logger << "(DATAWRITER) Starting to write save state: " << fileName << " (time step = "  << sim.timestep << ", time = " << sim.t << ")" << endl;
 
    const string meshName = "SpatialGrid";
 
