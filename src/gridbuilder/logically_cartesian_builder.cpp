@@ -448,7 +448,7 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
 	 if (zCells == 1) {
 	    z_min = -dcHalf;
 	    z_max = dcHalf;
-	    simClasses.logger << "\t forcing Cartesian cubic cells: restting coordinate limits of a single cell axis: z (z_min = " << z_min << ", z_max = " << z_max << ")" << endl;
+	    simClasses.logger << "\t forcing Cartesian cubic cells: resetting coordinate limits of a single cell axis: z (z_min = " << z_min << ", z_max = " << z_max << ")" << endl;
 	 }
       }
       // check resulting cell sizes
