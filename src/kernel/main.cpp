@@ -21,6 +21,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <iomanip>
 #ifdef _OPENMP
    #include <omp.h>
 #endif
@@ -40,7 +41,8 @@ using namespace std;
 
 const int MASTER_RANK = 0;
 static corsair::ObjectWrapper objectWrapper;
-const string logFileName = "logfile.txt";
+const string fileNameMainLog = "logfile.txt";
+const string fileNameLoadBalanceLog = "loads.log";
 
 bool continueSimulation(Simulation& sim) {
    bool cont = true;
@@ -117,9 +119,9 @@ int main(int argn,char* args[]) {
    // Do not start if a log file exists already:
    int logFileExists = 0;
    if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) {
-      if (checkFileExists(logFileName) == true) {
+      if (checkFileExists(fileNameMainLog) == true) {
 	 logFileExists = 1;
-	 cerr << "(MAIN) Log file (" << logFileName << ") exist already, exiting.." << endl << flush;
+	 cerr << "(MAIN) Log file (" << fileNameMainLog << ") exist already, exiting.." << endl << flush;
       }
    }
    MPI_Bcast(&logFileExists,1,MPI_Type<int>(),objectWrapper.sim.MASTER_RANK,objectWrapper.sim.comm);
@@ -133,7 +135,7 @@ int main(int argn,char* args[]) {
    #endif
 
    // Open a log file:
-   objectWrapper.simClasses.logger.open(objectWrapper.sim.comm,objectWrapper.sim.MASTER_RANK,logFileName,true);
+   objectWrapper.simClasses.logger.open(objectWrapper.sim.comm,objectWrapper.sim.MASTER_RANK,fileNameMainLog,true);
    objectWrapper.simClasses.logger << "(MAIN) Corsair starting initialisation." << endl;
    objectWrapper.simClasses.logger << "Using " << objectWrapper.sim.mpiProcesses << " MPI processes and ";
    #ifndef _OPENMP
@@ -374,7 +376,7 @@ int main(int argn,char* args[]) {
 
    // Read data save interval from config file:
    string dataSaveIntervalUnit;
-   objectWrapper.sim.t_previousDataSave = objectWrapper.sim.t;   
+   objectWrapper.sim.t_previousDataSave = objectWrapper.sim.t;
    objectWrapper.configReader.get("Simulation.data_save_interval_unit",dataSaveIntervalUnit);
    if (dataSaveIntervalUnit == "time") { objectWrapper.sim.dataIntervalIsTime = true; }
    else if (dataSaveIntervalUnit == "timestep") { objectWrapper.sim.dataIntervalIsTime = false; }
@@ -499,8 +501,16 @@ int main(int argn,char* args[]) {
 	  profile::stop();
       #endif
       }
-      fstream loads("timeseries_loads.txt", fstream::out);
-      if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) { loads << "#step load(min) load(max) load(avg) imbalance_ratio" << endl; }
+      // logging computational load balances of mpi processes
+      fstream loads;
+      if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) {
+	 loads.open(fileNameLoadBalanceLog,fstream::out);
+	 loads.precision(10);
+	 loads << scientific << showpos << setfill('0');
+	 loads << "% timestep time load(min) load(max) load(avg) load(imbalance_ratio) Np(min) Np(max) Np(avg) Np(imbalance_ratio)" << endl;
+	 loads << "% load = seconds per cell" << endl;
+	 loads << "% Np = number of particles per cell" << endl;
+      }
       objectWrapper.simClasses.logger << "(MAIN) Starting to run simulation" << endl << write;
       while (continueSimulation(objectWrapper.sim) == true) {
          // If partitioning is checked on this time step, set objectWrapper.sim.countPropagTime to true:
@@ -591,17 +601,18 @@ int main(int argn,char* args[]) {
 
                // Write statistics of computational load to time series file (master process only):
                if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) {
-                  loads << objectWrapper.sim.timestep << '\t';
+                  loads << setw(12) << objectWrapper.sim.timestep << " ";
+		  loads << objectWrapper.sim.t << " ";
                   // Write min,max,avg,imbalance ratio:
-                  loads << compuLoad.loadMin[corsair::compuload::SECONDS_PER_CELL] << '\t';
-                  loads << compuLoad.loadMax[corsair::compuload::SECONDS_PER_CELL] << '\t';
-                  loads << compuLoad.loadAvg[corsair::compuload::SECONDS_PER_CELL] << '\t';
-                  loads << compuLoad.ratios[corsair::compuload::SECONDS_PER_CELL] << '\t';
+                  loads << compuLoad.loadMin[corsair::compuload::SECONDS_PER_CELL] << " ";
+                  loads << compuLoad.loadMax[corsair::compuload::SECONDS_PER_CELL] << " ";
+                  loads << compuLoad.loadAvg[corsair::compuload::SECONDS_PER_CELL] << " ";
+                  loads << compuLoad.ratios[corsair::compuload::SECONDS_PER_CELL] << " ";
                   // Write min,max,avg number of particles and imbalance ratio:
-                  loads << compuLoad.loadMin[corsair::compuload::N_PARTICLES] << '\t';
-                  loads << compuLoad.loadMax[corsair::compuload::N_PARTICLES] << '\t';
-                  loads << compuLoad.loadAvg[corsair::compuload::N_PARTICLES] << '\t';
-                  loads << compuLoad.ratios[corsair::compuload::N_PARTICLES] << '\t';
+                  loads << compuLoad.loadMin[corsair::compuload::N_PARTICLES] << " ";
+                  loads << compuLoad.loadMax[corsair::compuload::N_PARTICLES] << " ";
+                  loads << compuLoad.loadAvg[corsair::compuload::N_PARTICLES] << " ";
+                  loads << compuLoad.ratios[corsair::compuload::N_PARTICLES];
                   loads << endl;
                }
                #if PROFILE_LEVEL > 0
@@ -632,7 +643,10 @@ int main(int argn,char* args[]) {
             }
          }
       }
-      loads.close();
+      if (objectWrapper.sim.mpiRank == objectWrapper.sim.MASTER_RANK) {
+	 loads.flush();
+	 loads.close();
+      }
    }
    #if PROFILE_LEVEL > 0
       profile::stop();
