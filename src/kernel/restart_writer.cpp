@@ -114,7 +114,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
 
    // Write necessary simulation parameters (only master process ends up writing these):
    if (simClasses.vlsv.writeParameter("time",&sim.t) == false) success = false;
-   if (simClasses.vlsv.writeParameter("time step",&sim.timestep) == false) success = false;
+   if (simClasses.vlsv.writeParameter("timestep",&sim.timestep) == false) success = false;
    if (simClasses.vlsv.writeParameter("dt",&sim.dt) == false) success = false;
 
    // Write name of mesh (master process only):
@@ -214,7 +214,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
       attribs["name"] = arrayNames[i];
       attribs["mesh"] = meshName;
       attribs["type"] = "celldata";
-      if (simClasses.vlsv.writeArray("SIZE(DYNAMIC)",attribs,N_blocks,1,&(arraySizes[i][0])) == false) {
+      if (simClasses.vlsv.writeArray("SIZE_DYNAMIC",attribs,N_blocks,1,&(arraySizes[i][0])) == false) {
 	 simClasses.logger << "\t Failed to write dynamic user data '" << arrayNames[i] << "' size array!" << endl << write;
 	 success = false;
       }

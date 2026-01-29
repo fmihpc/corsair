@@ -243,7 +243,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
    // Values of generic simulation parameters are read here
    // and copied to struct Simulation:
    if (vlsvReader->readParameter("time",sim->t) == false) success = false;
-   if (vlsvReader->readParameter("time step",sim->timestep) == false) success = false;
+   if (vlsvReader->readParameter("timestep",sim->timestep) == false) success = false;
    if (vlsvReader->readParameter("dt",sim->dt) == false) success = false;
    if (success == false) {
       simClasses->logger << "(RESTART BUILDER) ERROR: Failed to read t, timestep, or dt from restart file" << endl << write;
@@ -353,7 +353,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
       attribs.clear();
       attribs.push_back(make_pair("name",*it));
       attribs.push_back(make_pair("mesh",meshName));
-      if (vlsvReader->getArrayInfo("SIZE(DYNAMIC)",attribs,arraySize,vectorSize,datatype,dataSize) == false) {
+      if (vlsvReader->getArrayInfo("SIZE_DYNAMIC",attribs,arraySize,vectorSize,datatype,dataSize) == false) {
 	 simClasses->logger << "(RESTART BUILDER) ERROR: Failed to obtain dynamic data '" << *it << "' size array info!" << endl << write;
 	 success = false; break;
       }
@@ -368,7 +368,7 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
 
       // Read dynamic data size array:
       char* buffer = new char[arraySize*vectorSize*dataSize];
-      if (vlsvReader->readArray("SIZE(DYNAMIC)",attribs,cellOffsetStart,cellOffsetEnd-cellOffsetStart,buffer) == false) {
+      if (vlsvReader->readArray("SIZE_DYNAMIC",attribs,cellOffsetStart,cellOffsetEnd-cellOffsetStart,buffer) == false) {
 	 simClasses->logger << "(RESTART BUILDER) ERROR: Failed to read dynamic array data from file" << endl << write;
 	 success = false;
       }
