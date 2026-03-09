@@ -23,9 +23,6 @@
 
 using namespace std;
 
-// remove this definition if you want to get log messages from all processes (can produce very long log files)
-#define NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES
-
 /** Default constructor for class MPILogger.*/
 MPILogger::MPILogger() {
    fileOpen = false;
@@ -67,7 +64,7 @@ bool MPILogger::close() {
 bool MPILogger::flush() {
    if (fileOpen == false) { return false; }
    bool success = true;
-   #ifdef NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES
+   #ifdef NDEBUG
       if (mpiRank != masterRank) { return true; }
    #endif
 
@@ -88,17 +85,8 @@ bool MPILogger::flush() {
    strTime = outStream.str();
    tmp << strTime << endl;
 
-#ifndef NDEBUG
-#ifndef NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES
-   tmp << "(MPILOGGER) NDEBUG and NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES not defined, writing main log output from all processes (can produce a very long log file)" << endl << endl;
-#else
-   tmp << "(MPILOGGER) NDEBUG not defined but NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES defined, writing main log output only from master. Undefine NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES if need log output from all processes." << endl << endl;
-#endif
-#endif
-
    #ifndef NDEBUG
       mpiFile << tmp.str();
-
        // If the write was successful, clear stream buffer:
       if (mpiFile.getCount<size_t>() != tmp.str().size()) { return false; }
       outStream.str(string(""));
@@ -129,18 +117,24 @@ bool MPILogger::open(MPI_Comm comm,const int& MASTER_RANK,const std::string& fna
       if (mpiFile.open(comm,fname,MPI_INFO_NULL,accessMode,true) == false) { success = false; }
       if (mpiFile.resetPosition() == false) { success = false; }
       if (success == true) { fileOpen = true; }
+   outStream
+     << "(MPILOGGER) NDEBUG not defined: writing the main log output from all MPI PEs" << endl
+     << "\t NOTE: opens the main log from all MPI PEs, which can cause strain on storage space" << endl
+     << "\t NOTE: can produce a lot of lines in the main log" << endl << endl;
    #else
       if (mpiRank != MASTER_RANK) { return success; }
       masterStream = new fstream;
       masterStream->open(fname.c_str(), fstream::out);
       if (masterStream->good() == false) { success = false; }
       fileOpen = true;
+   outStream
+     << "(MPILOGGER) NDEBUG defined: writing the main log output only from MPI master (default)" << endl << endl;
    #endif
    return success;
 }
 
 bool MPILogger::print(const std::string& s) {
-   #ifndef NDEBUG_LOG_MESSAGES_FROM_ALL_PROCESSES
+   #ifndef NDEBUG
       mpiFile << s;
       if (mpiFile.getCount<size_t>() != s.size()) { return false; }
    #else
@@ -197,7 +191,7 @@ MPILogger& MPILogger::operator<<(std::ostream& (*pf)(std::ostream& )) {
 MPILogger& write(MPILogger& logger) {
    if (logger.flush() == false) {
       #ifndef NDEBUG
-         cerr << "Logger failed to write!" << endl;
+         cerr << "(MPILogger): failed to write" << endl << flush;
       #endif
    }
    return logger;
