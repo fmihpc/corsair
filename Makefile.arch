@@ -9,6 +9,9 @@ CMP=mpic++
 CXXFLAGS=-O3 -std=c++17 -Wall -pedantic -DPROFILE -DNDEBUG
 MATHFLAGS=-ffast-math -funroll-loops
 
+# not used anymore
+#CXXFLAGS+=-fopenmp -Wno-long-long -Wno-literal-suffix -DMPICH_IGNORE_CXX_SEEK -std=c++0x -fabi-version=0 -mavx
+
 # Archiver
 AR = ar
 
@@ -22,10 +25,14 @@ LNK=mpic++
 
 # Miscellaneous files:
 INC=
+#INC=-I$(HOME)/bin/util
 
 # Boost
 INC_BOOST=-I/usr/include/boost
 LIB_BOOST=-L/usr/lib/ -lboost_program_options
+
+# OpenMP
+#LIB_OPENMP=-lgomp
 
 # ParGrid (no LIB)
 INC_PARGRID=-I$(HOME)/bin/pargrid/
@@ -38,4 +45,4 @@ LIB_VLSV=-L$(HOME)/bin/vlsv/ -lvlsv
 # Zoltan
 INC_ZOLTAN=-I$(HOME)/bin/Zoltan-3.901/build/include/
 LIB_ZOLTAN=-L$(HOME)/bin/Zoltan-3.901/build/lib/ -lzoltan
-
+#LIB_ZOLTAN=-lzoltan -lptscotch -lptscotcherr -lparmetis -lmetis
