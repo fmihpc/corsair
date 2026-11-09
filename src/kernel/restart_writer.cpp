@@ -227,7 +227,8 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
       }
 
       // Init multiwrite mode:
-      if (simClasses.vlsv.startMultiwrite(arrayDatatypes[i],myArraySize,1,arrayByteSizes[i]) == false) {
+      // NOTE: Datatype of byte size n is treated as a vector of n, 1-byte int8 values
+      if (simClasses.vlsv.startMultiwrite(arrayDatatypes[i],myArraySize,arrayByteSizes[i],1) == false) {
 	 simClasses.logger << "\t Failed to start multiwrite!" << endl << write;
 	 success = false;
       }
@@ -235,10 +236,7 @@ bool writeRestart(Simulation& sim,SimulationClasses& simClasses) {
       // Write elements stored in each block in multiwrite mode:
       for (pargrid::CellID c=0; c<simClasses.pargrid.getNumberOfLocalCells(); ++c) {
 	 // NOTE: addMultiwriteUnit function call here binds to the template wrapper function
-	 // which creates an MPI datatype for char pointer, when it should be a continuous
-	 // array of chars with arrayByteSizes[i] elements. This is corrected by writing
-	 // arraySizes[i][c]*arrayByteSizes[i] elements instead of arraySizes[i][c].
-	 if (simClasses.vlsv.addMultiwriteUnit(arrayDynamicPointers[i][c],arraySizes[i][c]*arrayByteSizes[i]) == false) {
+	 if (simClasses.vlsv.addMultiwriteUnit(arrayDynamicPointers[i][c],arraySizes[i][c]) == false) {
 	    simClasses.logger << "\t Failed to add a multiwrite unit!" << endl << write;
 	    success = false;
 	 }

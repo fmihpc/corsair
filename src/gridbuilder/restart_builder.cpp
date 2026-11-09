@@ -342,7 +342,14 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
       }
 
       // Create ParGrid array:
-      pargrid::DataID dataID = simClasses->pargrid.addUserData(*it,vectorSize,datatypeString,dataSize,true);
+      // NOTE: dynamic array datatype is saved as a "vector" of n, 1-byte int8 units, where each data point is a single n-byte datatype
+      // In order to interpret correctly, we must swap dataSize with vectorSize
+      pargrid::DataID dataID;
+      if (dataSize == 1 && vectorSize > 1) {
+         dataID = simClasses->pargrid.addUserData(*it,dataSize,datatypeString,vectorSize,true);
+      } else {
+         dataID = simClasses->pargrid.addUserData(*it,vectorSize,datatypeString,dataSize,true);
+      }
       if (dataID == pargrid::INVALID_DATAID) {
 	 simClasses->logger << "(RESTART BUILDER) ERROR: Failed to create dynamic array '" << *it << "' !" << endl << write;
 	 success = false; break;
@@ -403,7 +410,6 @@ bool RestartBuilder::getInitialState(builder::ID cellOffsetStart,builder::ID cel
 	   elementSum += ptr64[block];
 	 break;
       }
-
       // Collect element sums to master process who then computes correct offsets for everyone:
       uint64_t* globalOffsets = NULL;
       if (sim->mpiRank == sim->MASTER_RANK) globalOffsets = new uint64_t[sim->mpiProcesses];
