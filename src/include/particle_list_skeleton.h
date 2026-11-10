@@ -934,13 +934,11 @@ bool ParticleListSkeleton<SPECIES,PARTICLE>::updatePartitioning() {
    }
 
    // Reallocate N_particles array:
-   size_t sum = 0;
    delete [] N_particles;
    N_particles = new unsigned int[simClasses->pargrid.getNumberOfLocalCells()];
    pargrid::DataWrapper<PARTICLE> wrapper = simClasses->pargrid.getUserDataDynamic<PARTICLE>(particleDataID);
    for (pargrid::CellID block=0; block<simClasses->pargrid.getNumberOfLocalCells(); ++block) {
       N_particles[block] = wrapper.size()[block];
-      sum += wrapper.size()[block];
    }
 
    size_t counter = 0;
