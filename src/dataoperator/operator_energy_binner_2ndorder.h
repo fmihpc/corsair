@@ -38,14 +38,14 @@ class EnergyBinner2nd: public DataOperator {
  public:
    EnergyBinner2nd();
    ~EnergyBinner2nd();
-   
+
    bool finalize();
    std::string getName() const;
    bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);
    virtual bool writeData(const std::string& spatMeshName,const std::vector<ParticleListBase*>& particleLists);
-   
+
  private:
-   
+
    struct Instrument {
       std::vector<std::string> channelNames;        /**< Name of each energy channel.*/
       bool divideByBinWidth;                        /**< If true, measured counts are divided by channel bin
@@ -68,7 +68,7 @@ class EnergyBinner2nd: public DataOperator {
       int mpiWaitID;
       std::string profileName;
    #endif
-   
+
    std::vector<Instrument> instruments;
 
    int accCellIndex(int i,int j,int k) const;
@@ -102,11 +102,11 @@ void EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::accumulateCell(size_t instr,
    const int accBlockSize  = (block::WIDTH_X+2)*(block::WIDTH_Y+2)*(block::WIDTH_Z+2);
    Real acc[accBlockSize];
    for (int i=0; i<accBlockSize; ++i) acc[i] = 0.0;
-   
+
    const double* blockCrds = getBlockCoordinateArray(*sim,*simClasses);
    Real cellSize[3];
    getBlockCellSize(*simClasses,*sim,block,cellSize);
-   
+
    // Accumulate all particle species that contribute to this instrument's measurements:
    for (size_t s=0; s<instruments[instr].speciesNames.size(); ++s) {
       // Find particle list propagating the species with name speciesNames[s]:
@@ -118,10 +118,10 @@ void EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::accumulateCell(size_t instr,
 	 }
       }
       if (particleList == NULL) continue;
-      
+
       // Get particle species:
       const SPECIES* const species = reinterpret_cast<const SPECIES*>(particleList->getSpecies());
-      
+
       // Either use the species' mass or proton mass when calculating energy,
       // depending on whether to count energies per nucleon or not:
       Real mass = species->m;
@@ -144,14 +144,14 @@ void EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::accumulateCell(size_t instr,
 	 pos[GC::Z] = blockCrds[3*block+GC::Z] + particles[block][p].state[GC::Z];
 	 FIELD::getFields(block,sim->t,pos,E,B);
 	 const Real B_mag2 = vectorMagnitude2<3>(B);
-	 
+
 	 // Calculate particle's non-relativistic energy:
 	 crossProduct(E,B,V_drift);
 	 for (int j=0; j<3; ++j) V_drift[j] /= B_mag2;
 	 const Real v_mag2 = particles[block][p].state[GC::VPAR]*particles[block][p].state[GC::VPAR] + vectorMagnitude2<3>(V_drift);
 	 const Real energy = particles[block][p].state[GC::MU]*sqrt(B_mag2) + 0.5*mass*v_mag2;
 	 if (energy < instruments[instr].minValues[channel] || energy > instruments[instr].maxValues[channel]) continue;
-	 
+
 	 const Real weight = particles[block][p].state[GC::WEIGHT];
 	 switch (ORDER) {
 	  case 0:
@@ -205,22 +205,22 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::getScaleFactor(const std::st
 template<class FIELD,class SPECIES,class PARTICLE,int ORDER>
 bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses) {
    if (DataOperator::initialize(cr,sim,simClasses) == false) return false;
-   
+
    bool success = true;
-   
+
    // Read the number of energy binners from config file, and check the obtained value for sanity:
    int N_binners;
    std::string energyUnitIn = "";
    cr.add("EnergyBinner.binners","Number of energy binner instruments (int).",(int)0);
    cr.parse();
    cr.get("EnergyBinner.binners",N_binners);
-   
+
    if (N_binners < 0) {
       simClasses.logger << "(ENERGYBINNER) ERROR: parameter 'binners' has negative value!" << std::endl << write;
       return false;
    }
    if (N_binners == 0) return true;
-   
+
    // Read parameters of each instrument from config file:
    instruments.resize(N_binners);
    for (size_t i=0; i<instruments.size(); ++i) {
@@ -228,7 +228,7 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,
       ss << '.' << i << '.';
       std::string middix;              // Since this will be in the middle, it can't be prefix or suffix :)
       ss >> middix;
-      
+
       energyUnitIn = "";
       cr.add("EnergyBinner"+middix+"divide_by_bin_width","Should counts be divided by energy channel width (yes/no) ?","");
       cr.add("EnergyBinner"+middix+"name","Name of the instrument (string).","");
@@ -239,13 +239,13 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,
       cr.addComposed("EnergyBinner"+middix+"particle_species","Names of particle species this instrument bins (string,multiple).");
    }
    cr.parse();
-   
+
    for (size_t i=0; i<instruments.size(); ++i) {
       std::stringstream ss;
       ss << '.' << i << '.';
       std::string middix;
       ss >> middix;
-      
+
       std::string name,energyPerAmu,divideByBinWidth;
       std::vector<std::string> channels;
       std::vector<std::string> channelNames;
@@ -258,7 +258,7 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,
       if (cr.get("EnergyBinner"+middix+"channel_names",channelNames) == false) success = false;
       if (cr.get("EnergyBinner"+middix+"particle_species",speciesNames) == false) success = false;
       if (success == false) break;
-      
+
       // Remove empty entries from speciesNames:
       do {
 	 bool finished = true;
@@ -271,14 +271,14 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,
 	 }
 	 if (finished == true) break;
       } while (true);
-      
+
       // Check obtained values for sanity:
       if (channels.size() != channelNames.size()) {
 	 simClasses.logger << "(ENERGYBINNER) ERROR: Fields '" << "EnergyBinner"+middix+"channels" << "' and '";
 	 simClasses.logger << "EnergyBinner"+middix+"channel_names" << "' have different number of entries!" << std::endl << write;
 	 success = false;
       }
-      
+
       instruments[i].name = name;
       instruments[i].channelNames = channelNames;
       instruments[i].minValues.resize(channels.size());
@@ -286,7 +286,7 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,
       instruments[i].speciesIndices.resize(speciesNames.size());
       instruments[i].speciesNames = speciesNames;
       instruments[i].binWidth.resize(channels.size());
-      
+
       // Determine input/output energy units:
       Real energyScalingInput;
       if (getScaleFactor(energyUnitIn,energyScalingInput) == false) {
@@ -295,7 +295,7 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,
 	 simClasses.logger << "does not correspond to any known unit. Valid values are eV,keV,MeV,GeV." << std::endl << write;
 	 return false;
       }
-      
+
       // Determine if energy should be binned per nucleon:
       if (energyPerAmu == "yes") instruments[i].energyPerNucleon = true;
       else if (energyPerAmu == "no") instruments[i].energyPerNucleon = false;
@@ -303,7 +303,7 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,
 	 simClasses.logger << "(ENERGYBINNER) ERROR: Parameter 'EnergyBinner" << middix << "energy_per_amu' may only have value 'yes' or 'no'." << std::endl << write;
 	 return false;
       }
-      
+
       // Determine if counts should be divided by bin widths:
       if (divideByBinWidth == "yes") instruments[i].divideByBinWidth = true;
       else if (divideByBinWidth == "no") instruments[i].divideByBinWidth = false;
@@ -311,7 +311,7 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,
 	 simClasses.logger << "(ENERGYBINNER) ERROR: Parameter 'EnergyBinner" << middix << "divide_by_bin_width' may only have value 'yes' or 'no'." << std::endl << write;
 	 return false;
       }
-      
+
       for (size_t j=0; j<channels.size(); ++j) {
 	 // Check that each "channels" entry contains minimum and maximum energy, separated by a whitespace:
 	 const size_t separator = channels[j].find(' ');
@@ -325,11 +325,11 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::initialize(ConfigReader& cr,
 	 instruments[i].maxValues[j] = energyScalingInput * atof(channels[j].substr(separator+1,channels[j].size()-separator).c_str());
 	 instruments[i].binWidth[j]  = (instruments[i].maxValues[j] - instruments[i].minValues[j])/constants::CHARGE_ELEMENTARY;
       }
-      
+
       // Exit if errors have come up:
       if (success == false) break;
    }
-   
+
    #if PROFILE_LEVEL > 0
       std::stringstream ss;
       ss << "EnergyBinner" << ORDER;
@@ -359,7 +359,7 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::writeData(const std::string&
    }
 
    Real* const data = reinterpret_cast<Real*>(simClasses->pargrid.getUserData(arrayID));
-   
+
    // Create a ParGrid Stencil for transferring array 'data':
    std::vector<pargrid::NeighbourID> recvNbrTypeIDs;
    recvNbrTypeIDs.reserve(26);
@@ -369,13 +369,13 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::writeData(const std::string&
       recvNbrTypeIDs.push_back(nbrTypeID);
    }
    const pargrid::StencilID stencilID = simClasses->pargrid.addStencil(pargrid::remoteToLocalUpdates,recvNbrTypeIDs);
-   
+
    // Tell ParGrid that 'array' is transferred with the stencil created above:
    simClasses->pargrid.addDataTransfer(arrayID,stencilID);
    #if PROFILE_LEVEL > 0
       profile::stop();
    #endif
-   
+
    // Write all instrument data:
    for (size_t instr=0; instr<instruments.size(); ++instr) {
       // Write data from all channels:
@@ -436,7 +436,7 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::writeData(const std::string&
 	 Real cellSize[3];
 	 getBlockCellSize(*simClasses,*sim,0,cellSize);
 	 Real factor = 1.0 / (cellSize[0]*cellSize[1]*cellSize[2]);
-	 
+
 	 // Divide values in buffer by energy bin width (if necessary):
 	 if (instruments[instr].divideByBinWidth == true) {
 	    factor /= instruments[instr].binWidth[channel];
@@ -452,7 +452,7 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::writeData(const std::string&
 
 	 std::stringstream channelName;
 	 channelName << instruments[instr].channelNames[channel] << '_' << ORDER;
-	 
+
 	 // Write data to file:
 	 std::map<std::string,std::string> attribs;
 	 attribs["name"] = channelName.str();
@@ -479,5 +479,5 @@ bool EnergyBinner2nd<FIELD,SPECIES,PARTICLE,ORDER>::writeData(const std::string&
    #endif
    return success;
 }
-	 
+
 #endif

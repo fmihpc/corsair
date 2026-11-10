@@ -31,16 +31,16 @@
 
 class DataOperatorContainer {
  public:
-   
+
    DataOperatorContainer();
    ~DataOperatorContainer();
-   
+
    bool finalize();
    bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);
    bool registerOperator(DataOperator* op);
    unsigned int size() const;
    bool writeData(const std::string& meshName,std::vector<ParticleListBase*>& particleLists);
-   
+
  private:
    bool initialized;
    std::set<std::string> excludedOperators; /**< Names of DataOperators that are registered but 

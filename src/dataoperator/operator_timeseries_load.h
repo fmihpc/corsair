@@ -25,7 +25,7 @@ class LoadTSeriesOP: public DataOperator {
  public:
    LoadTSeriesOP();
    ~LoadTSeriesOP();
-   
+
    bool finalize();
    std::string getName() const;
    bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);

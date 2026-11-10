@@ -29,12 +29,12 @@ class EMAnalyticOperator: public DataOperator {
  public:
    EMAnalyticOperator();
    ~EMAnalyticOperator();
-   
+
    bool finalize();
    std::string getName() const;
    bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);
    bool writeData(const std::string& spatMeshName,const std::vector<ParticleListBase*>& particleLists);
-   
+
  private:
    #if PROFILE_LEVEL > 0
       int emAnalyticID;
@@ -47,7 +47,7 @@ EMAnalyticOperator<C>::EMAnalyticOperator(): DataOperator() {
      emAnalyticID = -1;
    #endif
 }
- 
+
 template<class C>
 EMAnalyticOperator<C>::~EMAnalyticOperator() {finalize();}
 
@@ -64,12 +64,12 @@ std::string EMAnalyticOperator<C>::getName() const {return "EManalytic";}
 template<class C>
 bool EMAnalyticOperator<C>::initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses) {
    initialized = true;
-   
+
    if (DataOperator::initialize(cr,sim,simClasses) == false) {
       simClasses.logger << "(EManalytic) ERROR: Field function (given as a template parameter) failed to initialize!" << std::endl << write;
       initialized = false;
    }
-   
+
    return initialized;
 }
 
@@ -77,25 +77,25 @@ template<class C>
 bool EMAnalyticOperator<C>::writeData(const std::string& spatMeshName,const std::vector<ParticleListBase*>& particleLists) {
    if (getInitialized() == false) return false;
    bool success = true;
-   
+
    #if PROFILE_LEVEL > 0
       profile::start("EMAnalytic",emAnalyticID);
    #endif
-   
+
    // Get local cell IDs:
    const pargrid::CellID N_localBlocks = simClasses->pargrid.getNumberOfLocalCells();  
-   
+
    // Allocate arrays for E,B vectors:
    Real* B = new Real[3*N_localBlocks*block::SIZE];
    Real* E = new Real[3*N_localBlocks*block::SIZE];
    const double* blockCrds = getBlockCoordinateArray(*sim,*simClasses);
-   
+
    // Calculate E & B vectors at local cell centroids:
    size_t index = 0;
    for (size_t block=0; block<N_localBlocks; ++block) {
       Real cellSize[3];
       getBlockCellSize(*simClasses,*sim,block,cellSize);
-      
+
       for (int k=0; k<block::WIDTH_Z; ++k) for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i) {
 	 // Sample E,B fields in the cell with N_samples in each coordinate direction.
 	 // Samples are divided in such a way that with one sample dx_sample=dx_cell,
@@ -108,7 +108,7 @@ bool EMAnalyticOperator<C>::writeData(const std::string& spatMeshName,const std:
 	 const Real dx_sample = cellSize[0]/N_samples;
 	 const Real dy_sample = cellSize[1]/N_samples;
 	 const Real dz_sample = cellSize[2]/N_samples;
-	 
+
 	 for (int n=0; n<3; ++n) E[3*index+n] = 0.0;
 	 for (int n=0; n<3; ++n) B[3*index+n] = 0.0;
 	 for (int kk=0; kk<N_samples; ++kk) for (int jj=0; jj<N_samples; ++jj) for (int ii=0; ii<N_samples; ++ii) {
@@ -125,7 +125,7 @@ bool EMAnalyticOperator<C>::writeData(const std::string& spatMeshName,const std:
 	 ++index;
       }
    }
-   
+
    // Write arrays to output file:
    std::map<std::string,std::string> attribs;
    attribs["name"] = "E";
@@ -135,15 +135,15 @@ bool EMAnalyticOperator<C>::writeData(const std::string& spatMeshName,const std:
    const uint64_t arraySize = N_localBlocks*block::SIZE;
    const uint64_t vectorSize = 3;
    if (simClasses->vlsv.writeArray("VARIABLE",attribs,arraySize,vectorSize,E) == false) success = false;
-   
+
    attribs["name"] = "B";
    attribs["unit"] = "T";
    if (simClasses->vlsv.writeArray("VARIABLE",attribs,arraySize,vectorSize,B) == false) success = false;
-   
+
    // Deallocate memory and exit:
    delete [] E; E = NULL;
    delete [] B; B = NULL;
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop();
    #endif

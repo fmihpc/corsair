@@ -415,47 +415,47 @@ bool LogicallyCartesianBuilder::initialize(Simulation& sim,SimulationClasses& si
    }
 
    // try to force cubic cells in Cartesian geometry
-   if(forceCubicCellsString == "yes") {
-      if(geometryString != "cartesian") {
+   if (forceCubicCellsString == "yes") {
+      if (geometryString != "cartesian") {
 	 simClasses.logger << "\t ERROR: force_cubic_cells = yes allowed only with geometry = cartesian" << endl << write;
 	 initialized = false;
 	 goto forceCubicCellsFailed;
       }
-      if(dxUniformString != "yes" || dyUniformString != "yes" || dzUniformString != "yes") {
+      if (dxUniformString != "yes" || dyUniformString != "yes" || dzUniformString != "yes") {
 	 simClasses.logger << "\t ERROR: force_cubic_cells = yes allowed only with dx_uniform = dy_uniform = dz_uniform = yes" << endl << write;
 	 initialized = false;
 	 goto forceCubicCellsFailed;
       }
       // find out cell size of the first axis with more than one cell or otherwise use x axis
       Real dc = -1.0;
-      if(xCells > 1)      { dc = (x_max - x_min)/xCells; }
-      else if(yCells > 1) { dc = (y_max - y_min)/yCells; }
-      else if(zCells > 1) { dc = (z_max - z_min)/zCells; }
+      if (xCells > 1)      { dc = (x_max - x_min)/xCells; }
+      else if (yCells > 1) { dc = (y_max - y_min)/yCells; }
+      else if (zCells > 1) { dc = (z_max - z_min)/zCells; }
       else                { dc = (x_max - x_min)/xCells; }
       // reset coordinate limits of single cell axes to [-dc/2,dc/2]
       const Real dcHalf = dc/2.0;
-      if(dc > 0) {
-	 if(xCells == 1) {
+      if (dc > 0) {
+	 if (xCells == 1) {
 	    x_min = -dcHalf;
 	    x_max = dcHalf;
 	    simClasses.logger << "\t forcing Cartesian cubic cells: resetting coordinate limits of a single cell axis: x (x_min = " << x_min << ", x_max = " << x_max << ")" << endl;
 	 }
-	 if(yCells == 1) {
+	 if (yCells == 1) {
 	    y_min = -dcHalf;
 	    y_max = dcHalf;
 	    simClasses.logger << "\t forcing Cartesian cubic cells: resetting coordinate limits of a single cell axis: y (y_min = " << y_min << ", y_max = " << y_max << ")" << endl;
 	 }
-	 if(zCells == 1) {
+	 if (zCells == 1) {
 	    z_min = -dcHalf;
 	    z_max = dcHalf;
-	    simClasses.logger << "\t forcing Cartesian cubic cells: restting coordinate limits of a single cell axis: z (z_min = " << z_min << ", z_max = " << z_max << ")" << endl;
+	    simClasses.logger << "\t forcing Cartesian cubic cells: resetting coordinate limits of a single cell axis: z (z_min = " << z_min << ", z_max = " << z_max << ")" << endl;
 	 }
       }
       // check resulting cell sizes
       const Real dx = (x_max - x_min)/xCells;
       const Real dy = (y_max - y_min)/yCells;
       const Real dz = (z_max - z_min)/zCells;
-      if(dx != dy || dx != dz || dy != dz) {
+      if (dx != dy || dx != dz || dy != dz) {
 	 simClasses.logger << "\t ERROR: failed forcing Cartesian cells to be cubic (force_cubic_cells = yes), (dx,dy,dz) = (" << dx << "," << dy << "," << dz << ")" << endl << write;
 	 initialized = false;
 	 goto forceCubicCellsFailed;

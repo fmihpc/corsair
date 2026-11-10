@@ -22,10 +22,10 @@
 #include <definitions.h>
 
 namespace rootf {
- 
+
    Real bisection(Real (*function)(Real x),Real xmin,Real xmax,
 		  Real tol_dif,Real tol_min,int max_iter);
-   
+
 }
 
 #endif

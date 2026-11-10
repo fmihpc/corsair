@@ -25,12 +25,12 @@ class ParticleOperator: public DataOperator {
  public:
    ParticleOperator();
    ~ParticleOperator();
-   
+
    bool finalize();
    std::string getName() const;
    bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);
    virtual bool writeData(const std::string& spatMeshName,const std::vector<ParticleListBase*>& particleLists);
-   
+
  private:
    #ifdef PROFILE
       int totalTimeID;

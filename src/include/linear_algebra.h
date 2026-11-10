@@ -104,15 +104,15 @@ void invertMatrix3by3(const REAL* const mat,REAL* invmat) {
    det += mat[2]*mat[3]*mat[7] - mat[0]*mat[5]*mat[7];
    det -= mat[1]*mat[3]*mat[8];
    det -= mat[2]*mat[4]*mat[6];
-   
+
    invmat[0] = mat[4]*mat[8] - mat[5]*mat[7];
    invmat[3] = mat[5]*mat[6] - mat[3]*mat[8];
    invmat[6] = mat[3]*mat[7] - mat[4]*mat[6];
-   
+
    invmat[1] = mat[2]*mat[7] - mat[1]*mat[8];
    invmat[4] = mat[0]*mat[8] - mat[2]*mat[6];
    invmat[7] = mat[1]*mat[6] - mat[0]*mat[7];
-   
+
    invmat[2] = mat[1]*mat[5] - mat[2]*mat[4];
    invmat[5] = mat[2]*mat[3] - mat[0]*mat[5];
    invmat[8] = mat[0]*mat[4] - mat[1]*mat[3];
@@ -124,11 +124,11 @@ void matrixMatrixMultiply3by3(const REAL* const A,const REAL* const B,REAL* resu
    result[0] = A[0]*B[0] + A[1]*B[3] + A[2]*B[6];
    result[1] = A[0]*B[1] + A[1]*B[4] + A[2]*B[7];
    result[2] = A[0]*B[2] + A[1]*B[5] + A[2]*B[8];
-   
+
    result[3] = A[3]*B[0] + A[4]*B[3] + A[5]*B[6];
    result[4] = A[3]*B[1] + A[4]*B[4] + A[5]*B[7];
    result[5] = A[3]*B[2] + A[4]*B[5] + A[5]*B[8];
-   
+
    result[6] = A[6]*B[0] + A[7]*B[3] + A[8]*B[6];
    result[7] = A[6]*B[1] + A[7]*B[4] + A[8]*B[7];
    result[8] = A[6]*B[2] + A[7]*B[5] + A[8]*B[8];

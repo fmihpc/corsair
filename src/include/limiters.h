@@ -65,16 +65,16 @@ REAL superbee(REAL u_left,REAL u_cent,REAL u_rght) {
    const REAL ONE  = 1.0;
    const REAL forw = u_rght-u_cent;
    const REAL back = u_cent-u_left;
-   
+
    REAL tmp = std::min(fabs(back),fabs(forw));
    tmp = std::min(tmp,HALF*fabs(back));
    tmp = std::min(tmp,fabs(forw));
-   
+
    REAL sign_forw = ONE;
    if (forw < 0.0) sign_forw = -ONE;
    REAL sign_back = ONE;
    if (back < 0.0) sign_back = -ONE;
-   
+
    return (sign_forw+sign_back)*tmp;
 }
 

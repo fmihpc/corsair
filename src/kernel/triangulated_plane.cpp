@@ -61,19 +61,19 @@ namespace ucdmesh {
 	    success = false;
 	    break;
 	 }
-	 
+
 	 ptrArea   += ucdmesh::facedataelement::SIZE;
 	 ptrNormal += ucdmesh::facedataelement::SIZE;
       }      
       return success;
    }
-   
+
    void initializePlanarSurface(const Real* corners,std::vector<Node>& nodes,
 				std::vector<TriangularFace>& faces) {
       // Store current number of nodes, needed to add correct faces below
       // in case there are multiple planar surfaces:
       const size_t N = nodes.size();
-      
+
       // Calculate additional node at centroid position:
       Real center[3];
       for (int i=0; i<3; ++i) center[i] = 0.0;
@@ -81,11 +81,11 @@ namespace ucdmesh {
       for (int i=0; i<4; ++i) center[1] += corners[3*i+1];
       for (int i=0; i<4; ++i) center[2] += corners[3*i+2];
       for (int i=0; i<3; ++i) center[i] /= 4;
-      
+
       // Generate nodes:
       for (int i=0; i<4; ++i) nodes.push_back(Node(corners[3*i+0],corners[3*i+1],corners[3*i+2]));
       nodes.push_back(Node(center[0],center[1],center[2]));
-      
+
       // Generate faces:
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,N+0,N+1,N+4));
       faces.push_back(TriangularFace(vlsv::celltype::TRIANGLE,3,N+1,N+2,N+4));
@@ -104,13 +104,13 @@ namespace ucdmesh {
    bool createPlane(const std::vector<Real>& corners,int refinements,std::vector<Node>& nodes,
 		    std::vector<TriangularFace>& faces,std::size_t& N_connections) {
       bool result = true;
-      
+
       // Sanity check on input parameters:
       if (refinements < 0) result = false;
-      
+
       // Exit if error(s) have occurred:
       if (result == false) return result;
-      
+
       nodes.clear();
       faces.clear();
 
@@ -119,7 +119,7 @@ namespace ucdmesh {
       for (size_t s=0; s<surfaces; ++s) {
 	 initializePlanarSurface(&(corners[12*s]),nodes,faces);
       }
-      
+
       // Exit if error(s) have occurred:
       if (result == false) {
 	 nodes.clear();
@@ -127,12 +127,12 @@ namespace ucdmesh {
 	 N_connections = 0;
 	 return result;
       }
-      
+
       // Refine:
       for (int i=0; i<refinements; ++i) refineFaces(nodes,faces);
 
       N_connections = 5*faces.size();
       return result;
    }
-   
+
 } // namespace ucdmesh

@@ -91,7 +91,7 @@ namespace particlelist {
       wrapper.resize(blockLID,newSize);
       N_particles[blockLID] = newSize;
    }
-   
+
 } // namespace particlelist
 
 #endif

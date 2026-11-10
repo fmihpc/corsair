@@ -29,16 +29,16 @@ GridBuilder::~GridBuilder() { }
 
 bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
    bool success = true;
-   
+
    simClasses.logger << "(GRIDBUILDER) Starting to build grid." << endl;
-   
+
    // Get the total number of cells in the grid:
    builder::ID N_totalCells = 0;
    if (getNumberOfCells(N_totalCells) == false) {
       simClasses.logger << "\t Failed to get number of cells to create!" << endl;
       success = false;
    }
-   
+
    // Do an initial partitioning of cells amongs the processes. 
    // Every process does the partitioning and arrives at the same result:
    builder::ID* cellOffsets = new builder::ID[sim.mpiProcesses+1];
@@ -54,7 +54,7 @@ bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
    const builder::ID myCellsEnd   = cellOffsets[sim.mpiRank+1];
    delete [] cellOffsets; cellOffsets = NULL;
    delete [] cellsPerProcess; cellsPerProcess = NULL;
-   
+
    // Get cell global IDs and their number of neighbours:
    builder::ID* cellIDs = new builder::ID[N_cells];
    unsigned char* N_neighbours = new unsigned char[N_cells];
@@ -78,7 +78,7 @@ bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
          success = false;
       }
    }
-   
+
    // Add cells to parallel grid:
    #if PROFILE_LEVEL > 0
       static int profCreateCells = -1;
@@ -98,7 +98,7 @@ bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
             nbrIDs.push_back(neighbourIDs[counter+j]);
             nbrTypeIDs.push_back(neighbourTypeIDs[counter+j]);
          }
-         
+
          if (simClasses.pargrid.addCell(cellID,nbrIDs,nbrTypeIDs) == false) success = false;
          counter += N_neighbours[i];
       }
@@ -117,7 +117,7 @@ bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
    #if PROFILE_LEVEL > 0
       profile::stop();
    #endif
-   
+
    // ParGrid uses local IDs, but we gave global IDs when add cells. 
    // Request local IDs from ParGrid:
    vector<pargrid::CellID> localIDs(N_cells);
@@ -144,7 +144,7 @@ bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
       }
    }
    delete [] cellIDs; cellIDs = NULL;
-   
+
    // Balance load:
    if (success == true) for (size_t cell=0; cell<N_cells; ++cell) {
       simClasses.pargrid.getCellWeights()[cell] = 1.0;
@@ -157,7 +157,7 @@ bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
       sim.meshChangedStep   = sim.timestep;
       sim.meshRepartitioned = true;
    }
-   
+
    // Check that all processes succeeded in grid building:
    unsigned int successSum = 0;
    unsigned int mySuccess = 0;
@@ -168,8 +168,8 @@ bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
       success = false;
    }
 
-   if(success == true) { simClasses.logger << "\t Build successful." << endl; }
-   
+   if (success == true) { simClasses.logger << "\t Build successful." << endl; }
+
    // Flush log message and exit:
    simClasses.logger << write;
    return success;
@@ -184,7 +184,7 @@ bool GridBuilder::build(Simulation& sim,SimulationClasses& simClasses) {
  * @return If true, all processes succeeded in mesh writing.*/
 bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const std::string& meshName,bool writeMesh) {
    bool success = true;
-   
+
    // XML tag called MESH must appear on each VLSV file even if the mesh is not written out:
    map<string,string> attributes;
    if (writeMesh == false) {
@@ -193,11 +193,11 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
       attributes["file"] = sim.meshFileName;
       attributes["type"] = vlsv::mesh::STRING_QUAD_MULTI;
       if (simClasses.vlsv.writeArray("MESH",attributes,0,1,array) == false) success = false;
-      
+
       // If mesh is read from another file we can exit now:
       return success;
    }
-   
+
    // Write mesh bounding box (master process only):
    Real array[6];
    if (sim.mpiRank == sim.MASTER_RANK) {
@@ -209,7 +209,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
    array[3] /= block::WIDTH_X;
    array[4] /= block::WIDTH_Y;
    array[5] /= block::WIDTH_Z;
-   
+
    attributes.clear();
    attributes["mesh"] = meshName;
    if (sim.mpiRank == sim.MASTER_RANK) {
@@ -217,7 +217,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
    } else {
       if (simClasses.vlsv.writeArray("MESH_BBOX",attributes,0,1,array) == false) success = false;
    }
-   
+
    // Check that everything is ok:
    if (success == false) return success;
 
@@ -234,7 +234,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
 	 success = false;
       }
    }
-   
+
    // Write block local IDs to all boundary blocks:
    pargrid::CellID* lidArray = NULL;
    if (success == true) {
@@ -245,7 +245,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
 	 for (int i=0; i<block::SIZE; ++i) lidArray[blockLID+i] = blockLID + i;
       }
    }
-   
+
    // Start transfer:
    if (success == true) {
       if (simClasses.pargrid.startNeighbourExchange(pargrid::DEFAULT_STENCIL,lidArrayID) == false) {
@@ -253,7 +253,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
 	 success = false;
       }
    }
-   
+
    // Calculate mesh block (i,j,k) indices:
    builder::ID* indices = NULL;
    const pargrid::CellID N_blocks = simClasses.pargrid.getNumberOfAllCells();
@@ -263,7 +263,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
       success = false;
       simClasses.logger << "(GRIDBUILDER) ERROR: Failed to calculate mesh block (i,j,k) indices!" << endl << write;
    }
-   
+
    // Calculate cell indices for all cells in the blocks:
    pargrid::CellID* indicesOut = NULL;
    if (success == true) {
@@ -279,7 +279,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
       }
    }
    delete [] indices; indices = NULL;
-   
+
    // Write cell indices to file:
    if (success == true) {
       attributes.clear();
@@ -291,7 +291,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
       }
    }
    delete [] indicesOut; indicesOut = NULL;
-   
+
    // Write number of cells in this multimesh:
    attributes.clear();
    attributes["mesh"] = meshName;
@@ -300,13 +300,13 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
       simClasses.logger << "(GRIDBUILDER) ERROR: Failed to write mesh domain size!" << endl << write;
       success = false;
    }
-   
+
    // Wait for block local IDs:
    if (simClasses.pargrid.wait(pargrid::DEFAULT_STENCIL,lidArrayID) == false) {
       simClasses.logger << "(GRIDBUILDER) ERROR: Failed to exchange block local IDs!" << endl << write;
       success = false;
    }
-   
+
    if (success == true) {
       // Write N_ghosts local IDs:
       const uint64_t N_ghosts = N_blocks-simClasses.pargrid.getNumberOfLocalCells();
@@ -315,7 +315,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
 	 simClasses.logger << "(GRIDBUILDER) ERROR: Failed to write block local IDs!" << endl << write;
 	 success = false;
       }
-      
+
       // Write N_ghosts host IDs:  
       pargrid::CellID counter = 0;
       pargrid::MPI_processID* hosts = new pargrid::MPI_processID[N_ghosts*block::SIZE];
@@ -331,7 +331,7 @@ bool GridBuilder::writeMesh(Simulation& sim,SimulationClasses& simClasses,const 
       }
       delete [] hosts; hosts = NULL;
    }
-   
+
    // Remove ParGrid localID array created above:
    simClasses.pargrid.removeDataTransfer(pargrid::DEFAULT_STENCIL,lidArrayID);
    simClasses.pargrid.removeUserData(lidArrayID);

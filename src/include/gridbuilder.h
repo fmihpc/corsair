@@ -38,12 +38,12 @@ class GridBuilder {
 
    bool build(Simulation& sim,SimulationClasses& simClasses);
    virtual bool writeMesh(Simulation& sim,SimulationClasses& simClasses,const std::string& name,bool write);
-   
+
    // ********************************************************* //
    // ***** DECRALATIONS OF PURE VIRTUAL MEMBER FUNCTIONS ***** //
    // *****   IMPLEMENTING CLASSES MUST DEFINE ALL THESE  ***** //
    // ********************************************************* //
-   
+
    virtual bool finalize() = 0;
    virtual bool getCellIndices(unsigned int N_cells,const builder::ID* const cellIDs,builder::ID*& indices) = 0;
    virtual bool getCellInfo(builder::ID cellOffsetStart,builder::ID cellOffsetEnd,builder::ID* cellIDs,unsigned char* N_neighbours) = 0;
@@ -53,7 +53,7 @@ class GridBuilder {
    virtual bool getInitialState(builder::ID cellOffsetStart,builder::ID cellOffsetEnd,builder::ID* cellIDs,double* coordinates) = 0;
    virtual bool getNumberOfCells(builder::ID& N_cells) = 0;
    virtual bool initialize(Simulation& sim,SimulationClasses& simClasses,ConfigReader& cr) = 0;
-   
+
  protected:
 
 };

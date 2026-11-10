@@ -34,7 +34,7 @@ DataOperatorContainer::~DataOperatorContainer() {
 bool DataOperatorContainer::finalize() {
    // Do not finelize if DRC has not been initialized:
    if (initialized == false) return false;
-   
+
    // Call finalize for all DataOperators and delete them:
    for (size_t i=0; i<operators.size(); ++i) {
       operators[i]->finalize();
@@ -49,7 +49,7 @@ bool DataOperatorContainer::finalize() {
 bool DataOperatorContainer::initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses) {
    // Do not init twice:
    if (initialized == true) return true;
-   
+
    bool success = true;
    this->sim = &sim;
    this->simClasses = &simClasses;
@@ -65,11 +65,11 @@ bool DataOperatorContainer::initialize(ConfigReader& cr,Simulation& sim,Simulati
    for (size_t i=0; i<excludeList.size(); ++i) {
       // Skip empty lines:
       if (excludeList[i].size() == 0) continue;
-      
+
       // Add DataOperator's name to excludedOperators:
       excludedOperators.insert(excludeList[i]);
    }
-   
+
    initialized = true;   
    return success;
 }
@@ -77,7 +77,7 @@ bool DataOperatorContainer::initialize(ConfigReader& cr,Simulation& sim,Simulati
 bool DataOperatorContainer::registerOperator(DataOperator* op) {
    if (initialized == false) return false;
    bool success = true;
-   
+
    // Check if an operator with the same name already exists:
    string name = op->getName();
    for (size_t i=0; i<operators.size(); ++i) {
@@ -93,7 +93,7 @@ bool DataOperatorContainer::registerOperator(DataOperator* op) {
    if (it != excludedOperators.end()) {
       simClasses->logger << "(DATAOPERATORCONTAINER) Added DataOperator '" << name << "' to exclude list" << endl;
    }
-   
+
    // Operator does not exist yet, add it 
    // to vector operators and initialze:
    if (success == true && it == excludedOperators.end()) {

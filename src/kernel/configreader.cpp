@@ -47,7 +47,7 @@ ConfigReader::ConfigReader() {
 /** Default destructor. ConfigReader::finalize must be called 
  * before destruction.*/
 ConfigReader::~ConfigReader() {
-   
+
 }
 
 /** Add an option whose value should be read from configuration file(s).
@@ -159,11 +159,11 @@ bool ConfigReader::add(const string& name,const string& descr,const uint64_t& de
 bool ConfigReader::add(const string& name,const string& descr,const string& defValue) {
    if (initialized == false) return false;
    if (rank != masterRank) return true;
-   
+
    // Add new option only if it does not already exist:
    pair<map<string,string>::iterator,bool> result = options.insert(make_pair(name,""));
    if (result.second == false) return false;
-   
+
    // Add it to Boost:
    optionBroadcasted.insert(make_pair(name,false));
    descriptions->add_options()(name.c_str(),PO::value<string>(&(result.first->second))->default_value(defValue),descr.c_str());   
@@ -180,11 +180,11 @@ bool ConfigReader::add(const string& name,const string& descr,const string& defV
 bool ConfigReader::addComposed(const string& name,const string& descr) {
    if (initialized == false) return false;
    if (rank != masterRank) return true;
-   
+
    // Add new vector option only if it doesn't already exist:
    pair<map<string,vector<string> >::iterator,bool> result = vectorOptions.insert(make_pair(name,vector<string>()));
    if (result.second == false) return false;
-   
+
    // Add vector option to Boost:
    vectorOptionBroadcasted.insert(make_pair(name,false));
    descriptions->add_options()(name.c_str(),PO::value<vector<string> >(&(result.first->second))->composing(),descr.c_str());
@@ -403,7 +403,7 @@ bool ConfigReader::get(const string& name,vector<string>& values) {
    // Attempt to find the requested option:
    map<string,vector<string> >::const_iterator it = vectorOptions.find(name);
    if (it == vectorOptions.end()) return false;
-   
+
    // Copy values to output vector:
    values = it->second;
    return true;
@@ -419,23 +419,23 @@ bool ConfigReader::get(const string& name,vector<string>& values) {
 bool ConfigReader::initialize(const std::string& envPrefix,int argn,char** args,MPI_Comm comm,int masterRank) {
    // Do not initialize, if initialization has already been done:
    if (initialized == true) return false;
-   
+
    initialized = false;
    //this->sim = &sim;
    this->argn = argn;
    this->args = args;
    this->envPrefix = envPrefix;
-   
+
    // Get the rank of this process in communicator comm
    MPI_Comm_dup(comm,&this->comm);
    this->masterRank = masterRank;
    MPI_Comm_rank(this->comm,&rank);
    //rank = sim.mpiRank;
-   
+
    if (rank == masterRank) {
       descriptions = new PO::options_description("All known input file parameters (name,default value,description)");
       initialized = true;
-      
+
       descriptions->add_options()
 	("globalconfig",PO::value<string>(&fileNameGlobalConfig)->default_value(""),
 	    "Name of file containing global configuration parameters, relative to current working directory (string).")
@@ -444,7 +444,7 @@ bool ConfigReader::initialize(const std::string& envPrefix,int argn,char** args,
 	("runconfig",PO::value<string>(&fileNameRunConfig)->default_value(""),
 	    "Name of file containing runtime configuration parameters, relative to current working directory (string).");
    }
-   
+
    // Master broadcasts init status to all processes:
    MPI_Bcast(&initialized,sizeof(bool),MPI_BYTE,masterRank,comm);
    return initialized;
@@ -462,19 +462,19 @@ bool ConfigReader::isInitialized() {return initialized;}
  */
 bool ConfigReader::parse() {
    if (initialized == false) return false;
-   
+
    if (rank == masterRank) {
       const bool allowUnknownOptions = true;
       variables = new PO::variables_map;
-      
+
       // Read options from command line:
       PO::store(PO::parse_command_line(argn,args,*descriptions),*variables);
       PO::notify(*variables);
-      
+
       // Read options from environment variables:
       PO::store(PO::parse_environment(*descriptions,envPrefix),*variables);
       PO::notify(*variables);
-      
+
       // Read options from runtime config file:
       if (fileNameRunConfig.size() > 0) {
 	 fstream in(fileNameRunConfig.c_str(),fstream::in);
@@ -486,7 +486,7 @@ bool ConfigReader::parse() {
 	 }
 	 in.close();
       }
-      
+
       // Read options from user-specific config file:
       if (fileNameUserConfig.size() > 0) {
 	 fstream in(fileNameUserConfig.c_str(),fstream::in);
@@ -498,7 +498,7 @@ bool ConfigReader::parse() {
 	 }
 	 in.close();
       }
-      
+
       // Read options from global config file:
       if (fileNameGlobalConfig.size() > 0) {
 	 fstream in(fileNameGlobalConfig.c_str(),fstream::in);
@@ -513,10 +513,10 @@ bool ConfigReader::parse() {
 
       // Process values read from all config files:
       PO::notify(*variables);
-      
+
       delete variables; variables = NULL;
    }
-   
+
    // Master process counts the number of option-value pairs to broadcast:
    unsigned int N_broadcasts = 0;
    if (rank == masterRank) {
@@ -525,7 +525,7 @@ bool ConfigReader::parse() {
       }
    }
    MPI_Bcast(&N_broadcasts,1,MPI_Type<unsigned int>(),masterRank,comm);
-   
+
    // Master process broadcasts new option-value pairs:
    const unsigned int maxLength = 512;
    char optionName[maxLength];
@@ -557,14 +557,14 @@ bool ConfigReader::parse() {
       }
    }
    MPI_Bcast(&N_broadcasts,1,MPI_Type<unsigned int>(),masterRank,comm);
-   
+
    // Master process broadcasts new vector options:
    size_t vectorSize = 0;
    if (rank == masterRank) {
       for (map<string,vector<string> >::const_iterator it=vectorOptions.begin(); it!=vectorOptions.end(); ++it) {
 	 map<string,bool>::iterator jt=vectorOptionBroadcasted.find(it->first);
 	 if (jt->second == true) continue;
-	 
+
 	 // Broadcast vector name:
 	 strncpy(optionName,it->first.c_str(),maxLength-1);
 	 MPI_Bcast(optionName,maxLength,MPI_Type<char>(),masterRank,comm);

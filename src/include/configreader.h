@@ -83,7 +83,7 @@ class ConfigReader {
    bool isInitialized();
    bool parse();
    bool printHelpMessage();
-   
+
  private:
    int argn;                                                 /**< Private copy of argn, as given in main.*/
    char** args;                                              /**< Private pointer to args, as given in main.*/

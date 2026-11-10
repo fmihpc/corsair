@@ -27,7 +27,7 @@ class OperatorPargridArray: public DataOperator {
  public:
    OperatorPargridArray();
    ~OperatorPargridArray();
-   
+
    bool finalize();
    std::string getName() const;
    bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);
@@ -45,7 +45,7 @@ class OperatorPargridArray: public DataOperator {
       std::string units;                /**< Physical units of variable in array.*/
       unsigned int vectorSize;          /**< Size of data vector.*/
    };
-   
+
    bool arrayInfoRead;                         /**< If true, ParGrid array information for arrays defined in 
 						* vector arrayNames have been read.*/
    std::vector<ArrayInfo> arrayInfo;           /**< Vector containing ArrayInfo for each ParGrid array that is written 
@@ -54,11 +54,11 @@ class OperatorPargridArray: public DataOperator {
 						May contain variable path.*/
    std::vector<std::string> arrayPargridNames; /**< Names of ParGrid arrays that are written to output files.*/   
    std::vector<std::string> arrayUnits;
-   
+
    #if PROFILE_LEVEL > 0
       int profTotalTime;                       /**< Total wallclock time used by this DataOperator.*/
    #endif
-   
+
    bool addConfigFileItems(Simulation& sim,SimulationClasses& simClasses,ConfigReader& cr);
    bool readArrayInfo();
 };

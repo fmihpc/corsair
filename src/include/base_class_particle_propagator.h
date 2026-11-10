@@ -33,21 +33,21 @@ class ParticlePropagatorBase {
  public:
    /** Default constructor (empty).*/
    ParticlePropagatorBase();
-   
+
    /** Default virtual destructor (empty).*/
    virtual ~ParticlePropagatorBase();
-   
+
    /** Add all configuration file items read by this class to given config file reader.
     * @param cr Configuration file reader.
     * @param regionName Name of configuration file region that contains 
     * parameters for this particle injector.
     * @return If true, configuration file items were added successfully.*/
    virtual bool addConfigFileItems(ConfigReader& cr,const std::string& regionName) = 0;
-   
+
    /** Finalize class. This function should deallocate all internal memory.
     * @return If true, class was finalized successfully.*/
    virtual bool finalize() = 0;
-   
+
    /** Initialize particle propagator. All inheriting classes should call base class initialize
     * function to set member variables ParticlePropagatorBase::sim and ParticlePropagatorBase::simClasses.
     * @param sim Generic simulation control variables.
@@ -58,7 +58,7 @@ class ParticlePropagatorBase {
     * @return If true, class was successfully initialized and is ready for use.*/
    virtual bool initialize(Simulation& sim,SimulationClasses& simClasses,ConfigReader& cr,
 			   const std::string& regionName,const ParticleListBase* plist);
-   
+
    /** Propagate particles in given cell.
     * @param blockLID Local ID of propagated block (or cell).
     * @param particleDataID Data ID of ParGrid dynamic array that contains propagated particles.
@@ -67,11 +67,10 @@ class ParticlePropagatorBase {
     * @return If true, all particles were successfully propagated.*/
    virtual bool propagateCell(pargrid::CellID blockLID,pargrid::DataID particleDataID,
 			      const double* const coordinates,unsigned int N_particles) = 0;
-   
+
  protected:
    Simulation* sim;               /**< Generic simulation control variables.*/
    SimulationClasses* simClasses; /**< Generic simulation classes.*/
 };
 
 #endif
- 

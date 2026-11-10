@@ -40,24 +40,24 @@ bool ParticleBoundaryCondBase::apply(pargrid::DataID particleDataID,unsigned int
 				     const std::vector<pargrid::CellID>& boundaryBlocks) {
    // Get particles:
    pargrid::DataWrapper<char> wrapper = simClasses->pargrid.getUserDataDynamic<char>(particleDataID);
-   
+
    // Remove particles from given blocks:
    Real t_propag = 0.0;
    for (size_t b=0; b<boundaryBlocks.size(); ++b) {
       // Measure computation time if we are testing for repartitioning:
       if (sim->countPropagTime == true) t_propag = MPI_Wtime();
-      
+
       const pargrid::CellID blockLID = boundaryBlocks[b];
       wrapper.resize(blockLID,0);
       N_particles[blockLID] = 0;
-      
+
       // Store block injection time:
       if (sim->countPropagTime == true) {
 	 t_propag = std::max(0.0,MPI_Wtime() - t_propag);
 	 simClasses->pargrid.getCellWeights()[blockLID] += t_propag;
       }
    }
-   
+
    return true;
 }
 

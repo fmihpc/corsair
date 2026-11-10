@@ -45,13 +45,13 @@ namespace block {
 
    template<typename INT>
    INT arrayIndex_XY(INT i,INT j);
-   
+
    template<typename INT>
    INT index(INT i,INT j,INT k);
-   
+
    template<typename INT>
    INT index(INT i,INT j);
-   
+
    template<typename T>
    void addValues2D_XZ(SimulationClasses& simClasses,pargrid::CellID block,const T* const array,T* const data);
    template<typename T>
@@ -59,7 +59,7 @@ namespace block {
 
    template<typename INT> inline
    INT calculateGlobalIndex(Simulation& sim,INT& i,INT& j,INT& k);
-   
+
    template<typename T>
    void fetchValues2D_XZ(SimulationClasses& simClasses,pargrid::CellID block,T* const dest,const T* const source);
    template<typename T>
@@ -108,7 +108,7 @@ namespace block {
    void addValues2D_XZ(SimulationClasses& simClasses,pargrid::CellID block,const T* const array,T* const data) {
       pargrid::CellID nbrLID = simClasses.pargrid.invalid();
       const pargrid::CellID* const nbrs = simClasses.pargrid.getCellNeighbourIDs(block);
-      
+
       // ***** ACCUMULATE TO FACE NEIGHBOURS ***** //
       // -x neighbour
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+0,+0)];
@@ -130,7 +130,7 @@ namespace block {
       if (nbrLID != simClasses.pargrid.invalid())
 	for (int i=0; i<block::WIDTH_X; ++i)
 	  data[nbrLID*block::SIZE+block::index(i,0,0)] += array[block::arrayIndex(i+1,1,block::WIDTH_Z+1)];
-      
+
       // ***** ACCUMULATE TO EDGE NEIGHBOURS ***** //
       // -x,-z neighbour
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+0,-1)];
@@ -152,13 +152,13 @@ namespace block {
       if (nbrLID != simClasses.pargrid.invalid())
 	for (int j=0; j<block::WIDTH_Y; ++j)
 	  data[nbrLID*block::SIZE+block::index(0,j,0)] += array[block::arrayIndex(block::WIDTH_X+1,j+1,block::WIDTH_Z+1)];
-      
+
       // ***** ACCUMULATE TO THIS BLOCK ***** //
       for (int k=0; k<block::WIDTH_Z; ++k) for (int i=0; i<block::WIDTH_X; ++i) {
 	 data[block*block::SIZE+block::index(i,0,k)] += array[block::arrayIndex(i+1,+1,k+1)];
       }
    }
-   
+
    /** Three-dimensional accumulator. This function accumulates values from the given 
     * array to all existing neighbours of the given block.
     * Note that this function works for scalar fields only.
@@ -170,150 +170,150 @@ namespace block {
    void addValues3D(SimulationClasses& simClasses,pargrid::CellID block,const T* const array,T* const data,const int vectorDim) {
       pargrid::CellID nbrLID = simClasses.pargrid.invalid();
       const pargrid::CellID* const nbrs = simClasses.pargrid.getCellNeighbourIDs(block);
-      
+
       // ***** ACCUMULATE TO FACE NEIGHBOURS ***** //
       // Add values to -x neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+0,+0)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int k=0; k<block::WIDTH_Z; ++k) for (int j=0; j<block::WIDTH_Y; ++j) for(int l=0;l<vectorDim;++l)
+	for (int k=0; k<block::WIDTH_Z; ++k) for (int j=0; j<block::WIDTH_Y; ++j) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(block::WIDTH_X-1,j,k))*vectorDim+l] += array[block::arrayIndex(0,j+1,k+1)*vectorDim+l];
       // Add values to -y neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+0,-1,+0)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int k=0; k<block::WIDTH_Z; ++k) for (int i=0; i<block::WIDTH_X; ++i) for(int l=0;l<vectorDim;++l)
+	for (int k=0; k<block::WIDTH_Z; ++k) for (int i=0; i<block::WIDTH_X; ++i) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(i,block::WIDTH_Y-1,k))*vectorDim+l] += array[block::arrayIndex(i+1,0,k+1)*vectorDim+l];
       // Add values to -z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+0,+0,-1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i) for(int l=0;l<vectorDim;++l)
+	for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(i,j,block::WIDTH_Z-1))*vectorDim+l] += array[block::arrayIndex(i+1,j+1,0)*vectorDim+l];
       // Add values to +x neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+1,+0,+0)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int k=0; k<block::WIDTH_Z; ++k) for (int j=0; j<block::WIDTH_Y; ++j) for(int l=0;l<vectorDim;++l)
+	for (int k=0; k<block::WIDTH_Z; ++k) for (int j=0; j<block::WIDTH_Y; ++j) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(0,j,k))*vectorDim+l] += array[block::arrayIndex(block::WIDTH_X+1,j+1,k+1)*vectorDim+l];
       // Add values to +y neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+0,+1,+0)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int k=0; k<block::WIDTH_Z; ++k) for (int i=0; i<block::WIDTH_X; ++i) for(int l=0;l<vectorDim;++l)
+	for (int k=0; k<block::WIDTH_Z; ++k) for (int i=0; i<block::WIDTH_X; ++i) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(i,0,k))*vectorDim+l] += array[block::arrayIndex(i+1,block::WIDTH_Y+1,k+1)*vectorDim+l];
       // Add values to +z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+0,+0,+1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i) for(int l=0;l<vectorDim;++l)
+	for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(i,j,0))*vectorDim+l] += array[block::arrayIndex(i+1,j+1,block::WIDTH_Z+1)*vectorDim+l];
-      
+
       // ***** ACCUMULATE TO EDGE NEIGHBOURS ***** //
       // Add values to -x,-y neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,-1,+0)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int k=0; k<block::WIDTH_Z; ++k) for(int l=0;l<vectorDim;++l)
+	for (int k=0; k<block::WIDTH_Z; ++k) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(block::WIDTH_X-1,block::WIDTH_Y-1,k))*vectorDim+l] += array[block::arrayIndex(0,0,k+1)*vectorDim+l];
       // Add values to +x,-y neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+1,-1,+0)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int k=0; k<block::WIDTH_Z; ++k) for(int l=0;l<vectorDim;++l)
+	for (int k=0; k<block::WIDTH_Z; ++k) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(0,block::WIDTH_Y-1,k))*vectorDim+l] += array[block::arrayIndex(block::WIDTH_X+1,0,k+1)*vectorDim+l];
       // Add values to -x,+y neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+1,+0)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int k=0; k<block::WIDTH_Z; ++k) for(int l=0;l<vectorDim;++l)
+	for (int k=0; k<block::WIDTH_Z; ++k) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(block::WIDTH_X-1,0,k))*vectorDim+l] += array[block::arrayIndex(0,block::WIDTH_Y+1,k+1)*vectorDim+l];
       // Add values to +x,+y neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+1,+1,+0)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int k=0; k<block::WIDTH_Z; ++k) for(int l=0;l<vectorDim;++l)
+	for (int k=0; k<block::WIDTH_Z; ++k) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(0,0,k))*vectorDim+l] += array[block::arrayIndex(block::WIDTH_X+1,block::WIDTH_Y+1,k+1)*vectorDim+l];
-      
+
       // Add values to -y,-z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+0,-1,-1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int i=0; i<block::WIDTH_X; ++i) for(int l=0;l<vectorDim;++l)
+	for (int i=0; i<block::WIDTH_X; ++i) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(i,block::WIDTH_Y-1,block::WIDTH_Z-1))*vectorDim+l] += array[block::arrayIndex(i+1,0,0)*vectorDim+l];
       // Add values to +y,-z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+0,+1,-1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int i=0; i<block::WIDTH_X; ++i) for(int l=0;l<vectorDim;++l)
+	for (int i=0; i<block::WIDTH_X; ++i) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(i,0,block::WIDTH_Z-1))*vectorDim+l] += array[block::arrayIndex(i+1,block::WIDTH_Y+1,0)*vectorDim+l];
       // Add values to -y,+z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+0,-1,+1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int i=0; i<block::WIDTH_X; ++i) for(int l=0;l<vectorDim;++l)
+	for (int i=0; i<block::WIDTH_X; ++i) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(i,block::WIDTH_Y-1,0))*vectorDim+l] += array[block::arrayIndex(i+1,0,block::WIDTH_Z+1)*vectorDim+l];
       // Add values to +y,+z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+0,+1,+1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int i=0; i<block::WIDTH_X; ++i) for(int l=0;l<vectorDim;++l)
+	for (int i=0; i<block::WIDTH_X; ++i) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(i,0,0))*vectorDim+l] += array[block::arrayIndex(i+1,block::WIDTH_Y+1,block::WIDTH_Z+1)*vectorDim+l];
-   
+
       // Add values to -x,-z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+0,-1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int j=0; j<block::WIDTH_Y; ++j) for(int l=0;l<vectorDim;++l)
+	for (int j=0; j<block::WIDTH_Y; ++j) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(block::WIDTH_X-1,j,block::WIDTH_Z-1))*vectorDim+l] += array[block::arrayIndex(0,j+1,0)*vectorDim+l];
       // Add values to +x,-z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+1,+0,-1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int j=0; j<block::WIDTH_Y; ++j) for(int l=0;l<vectorDim;++l)
+	for (int j=0; j<block::WIDTH_Y; ++j) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(0,j,block::WIDTH_Z-1))*vectorDim+l] += array[block::arrayIndex(block::WIDTH_X+1,j+1,0)*vectorDim+l];
       // Add values to -x,+z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+0,+1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int j=0; j<block::WIDTH_Y; ++j) for(int l=0;l<vectorDim;++l)
+	for (int j=0; j<block::WIDTH_Y; ++j) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(block::WIDTH_X-1,j,0))*vectorDim+l] += array[block::arrayIndex(0,j+1,block::WIDTH_Z+1)*vectorDim+l];
       // Add values to +x,+z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+1,+0,+1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for (int j=0; j<block::WIDTH_Y; ++j) for(int l=0;l<vectorDim;++l)
+	for (int j=0; j<block::WIDTH_Y; ++j) for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(0,j,0))*vectorDim+l] += array[block::arrayIndex(block::WIDTH_X+1,j+1,block::WIDTH_Z+1)*vectorDim+l];
-   
+
       // ***** ACCUMULATE TO CORNER NEIGHBOURS ***** //
       // Add value to -x,-y,-z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,-1,-1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for(int l=0;l<vectorDim;++l)
+	for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(block::WIDTH_X-1,block::WIDTH_Y-1,block::WIDTH_Z-1))*vectorDim+l] += array[block::arrayIndex(0,0,0)*vectorDim+l];
       // Add value to +x,-y,-z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+1,-1,-1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for(int l=0;l<vectorDim;++l)
+	for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(0,block::WIDTH_Y-1,block::WIDTH_Z-1))*vectorDim+l] += array[block::arrayIndex(block::WIDTH_X+1,0,0)*vectorDim+l];
       // Add value to -x,+y,-z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+1,-1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for(int l=0;l<vectorDim;++l)
+	for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(block::WIDTH_X-1,0,block::WIDTH_Z-1))*vectorDim+l] += array[block::arrayIndex(0,block::WIDTH_Y+1,0)*vectorDim+l];
       // Add value to +x,+y,-z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+1,+1,-1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for(int l=0;l<vectorDim;++l)
+	for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(0,0,block::WIDTH_Z-1))*vectorDim+l] += array[block::arrayIndex(block::WIDTH_X+1,block::WIDTH_Y+1,0)*vectorDim+l];
       // Add value to -x,-y,+z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,-1,+1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for(int l=0;l<vectorDim;++l)
+	for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(block::WIDTH_X-1,block::WIDTH_Y-1,0))*vectorDim+l] += array[block::arrayIndex(0,0,block::WIDTH_Z+1)*vectorDim+l];
       // Add value to +x,-y,+z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+1,-1,+1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for(int l=0;l<vectorDim;++l)
+	for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(0,block::WIDTH_Y-1,0))*vectorDim+l] += array[block::arrayIndex(block::WIDTH_X+1,0,block::WIDTH_Z+1)*vectorDim+l];
       // Add value to -x,+y,+z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+1,+1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for(int l=0;l<vectorDim;++l)
+	for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(block::WIDTH_X-1,0,0))*vectorDim+l] += array[block::arrayIndex(0,block::WIDTH_Y+1,block::WIDTH_Z+1)*vectorDim+l];
       // Add value to +x,+y,+z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(+1,+1,+1)];
       if (nbrLID != simClasses.pargrid.invalid())
-	for(int l=0;l<vectorDim;++l)
+	for (int l=0;l<vectorDim;++l)
 	  data[(nbrLID*block::SIZE+block::index(0,0,0))*vectorDim+l] += array[block::arrayIndex(block::WIDTH_X+1,block::WIDTH_Y+1,block::WIDTH_Z+1)*vectorDim+l];
-      
+
       // ***** ACCUMULATE TO THIS BLOCK ***** //
-      for (int k=0; k<block::WIDTH_Z; ++k) for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i) for(int l=0;l<vectorDim;++l)
+      for (int k=0; k<block::WIDTH_Z; ++k) for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i) for (int l=0;l<vectorDim;++l)
 	 data[(block*block::SIZE+block::index(i,j,k))*vectorDim+l] += array[block::arrayIndex(i+1,j+1,k+1)*vectorDim+l];
    }
-   
+
    /** Calculate index to temporary computation array. It is assumed here that the temporary 
     * array is two cells wider per coordinate direction than the block.
     * Note that this function works for scalar fields only.
@@ -330,7 +330,7 @@ namespace block {
    INT calculateGlobalIndex(Simulation& sim,INT& i,INT& j,INT& k) {
       return k*sim.y_blocks*sim.x_blocks + j*sim.x_blocks + i;
    }
-   
+
    template<typename INT> inline
    void calculateBlockIndices(Simulation& sim,pargrid::CellID blockGID,INT& i,INT& j,INT& k) {
       k = blockGID / (sim.y_blocks*sim.x_blocks);
@@ -339,10 +339,10 @@ namespace block {
       blockGID -= j*sim.x_blocks;
       i = blockGID;
    }
-   
+
    template<typename INT> inline
    INT index_XY(INT i,INT j) {return j*block::WIDTH_X + i;}
-   
+
    /** Calculate index into block. Note that this function works for scalar fields only.
     * @param i i-index of the cell in the block.
     * @param j j-index of the cell in the block.
@@ -360,15 +360,15 @@ namespace block {
    template<typename T> inline
    void fetchValues2D_XZ(SimulationClasses& simClasses,pargrid::CellID block,T* const dest,const T* const source) {
       const T* srcTmp = NULL;
-      
+
       // ***** FETCH DATA FROM THIS BLOCK ***** //
       srcTmp = source + block*block::SIZE;
       for (int k=0; k<block::WIDTH_Z; ++k) for (int i=0; i<block::WIDTH_X; ++i)
 	dest[block::arrayIndex(i+1,1,k+1)] = srcTmp[block::index(i,0,k)];
-      
+
       pargrid::CellID nbrLID = simClasses.pargrid.invalidCellID();
       const pargrid::CellID* const nbrs = simClasses.pargrid.getCellNeighbourIDs(block);
-      
+
       // ***** FETCH VALUES FROM FACE NEIGHBOURS ***** //
       // -x neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+0,+0)];
@@ -398,7 +398,7 @@ namespace block {
 	 for (int i=0; i<block::WIDTH_X; ++i)
 	   dest[block::arrayIndex(i+1,1,block::WIDTH_Z+1)] = srcTmp[block::index(i,0,0)];
       }
-      
+
       // ***** FETCH VALUES FROM CORNER NEIGHBOURS ***** //
       // -x,-z neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+0,-1)];
@@ -425,7 +425,7 @@ namespace block {
 	 dest[block::arrayIndex(block::WIDTH_X+1,1,block::WIDTH_Z+1)] = srcTmp[block::index(0,0,0)];
       }
    }
-   
+
    template<typename T> inline
    void fetchValues3D(SimulationClasses& simClasses,pargrid::CellID blockLID,T* RESTRICT const dest,const T* RESTRICT const source) {
       pargrid::CellID nbrLID = simClasses.pargrid.invalidCellID();
@@ -436,7 +436,7 @@ namespace block {
       srcTmp = source + blockLID*block::SIZE;
       for (int k=0; k<block::WIDTH_Z; ++k) for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i)
 	dest[block::arrayIndex(i+1,j+1,k+1)] = srcTmp[block::index(i,j,k)];
-      
+
       // ***** LOAD VALUES FROM 6 FACE NEIGHBOURS ***** //
       // Copy from -x neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+0,+0)];
@@ -480,7 +480,7 @@ namespace block {
 	 for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i)
 	   dest[block::arrayIndex(i+1,j+1,block::WIDTH_Z+1)] = srcTmp[block::index(i,j,0)];
       }
-      
+
       // ***** LOAD VALUES FROM 12 EDGE NEIGHBOURS ***** //
       // -x,-y neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,-1,+0)];
@@ -566,7 +566,7 @@ namespace block {
 	 for (int i=0; i<block::WIDTH_X; ++i)
 	   dest[block::arrayIndex(i+1,block::WIDTH_Y+1,block::WIDTH_Z+1)] = srcTmp[block::index(i,0,0)];
       }
-      
+
       // ***** LOAD VALUES FROM 8 CORNER NEIGHBOURS ***** //
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,-1,-1)];
       if (nbrLID != simClasses.pargrid.invalidCellID()) {
@@ -609,7 +609,7 @@ namespace block {
 	 dest[block::arrayIndex(block::WIDTH_X+1,block::WIDTH_Y+1,block::WIDTH_Z+1)] = srcTmp[block::index(0,0,0)];
       }
    }
-   
+
    /** Fetch data from simulation mesh to a temporary computation array. This 
     * function copies data from block's face neighbours (three-dimensional version).
     * Note that this function works for scalar fields only.
@@ -622,12 +622,12 @@ namespace block {
       pargrid::CellID nbrLID = simClasses.pargrid.invalidCellID();
       const pargrid::CellID* const nbrs = simClasses.pargrid.getCellNeighbourIDs(block);
       const T* dataTmp = NULL;
-      
+
       // ***** FETCH DATA FROM THIS BLOCK ***** //
       dataTmp = data + block*block::SIZE;
       for (int k=0; k<block::WIDTH_Z; ++k) for (int j=0; j<block::WIDTH_Y; ++j) for (int i=0; i<block::WIDTH_X; ++i)
 	array[block::arrayIndex(i+1,j+1,k+1)] = dataTmp[block::index(i,j,k)];
-      
+
       // ***** FETCH DATA FROM FACE NEIGHBOURS ***** //
       // Copy from -x neighbour:
       nbrLID = nbrs[simClasses.pargrid.calcNeighbourTypeID(-1,+0,+0)];
@@ -678,28 +678,28 @@ namespace block {
       // Calculate block i,j,k indices:
       unsigned int i_block,j_block,k_block;
       calculateBlockIndices(sim,blockGID,i_block,j_block,k_block);
-      
+
       // Copy values to output array:
       blockSize[0] = sim.dx_block[i_block];
       blockSize[1] = sim.dx_block[j_block];
       blockSize[2] = sim.dx_block[k_block];
    }
-   
+
    template<typename REAL> inline
    void getBlockSizes(Simulation& sim,SimulationClasses& simClasses,pargrid::CellID blockLID,REAL* RESTRICT blockSize) {
       // Get block global ID:
       const pargrid::CellID blockGID = simClasses.pargrid.getGlobalIDs()[blockLID];
-      
+
       // Calculate block i,j,k indices:
       unsigned int i_block,j_block,k_block;
       calculateBlockIndices(sim,blockGID,i_block,j_block,k_block);
-      
+
       // Copy values to output array:
       blockSize[0] = sim.dx_block[i_block];
       blockSize[1] = sim.dx_block[j_block];
       blockSize[2] = sim.dx_block[k_block];
    }
-   
+
    /** Get cell (x,y,z) sizes in a mesh block. Output pointers may be indexed as
     * dx[i], where 0 < i_cell < block::WIDTH_X, and similarly for dy,dz arrays.
     * @param sim 
@@ -712,13 +712,13 @@ namespace block {
       // Calculate block i,j,k indices;
       unsigned int i_block,j_block,k_block;
       calculateBlockIndices(sim,blockGID,i_block,j_block,k_block);
-      
+
       // Set output pointers:
       dx = sim.dx_cell + i_block*block::WIDTH_X;
       dy = sim.dy_cell + j_block*block::WIDTH_Y;
       dz = sim.dz_cell + k_block*block::WIDTH_Z;
    }
-   
+
    /** Get cell (x,y,z) sizes in a mesh block. Output pointers may be indexed as
     * dx[i], where 0 < i_cell < block::WIDTH_X, and similarly for dy,dz arrays.
     * @param sim 
@@ -732,17 +732,17 @@ namespace block {
 		     REAL*& RESTRICT dx,REAL*& RESTRICT dy,REAL*& RESTRICT dz) {
       // Get block global ID:
       const pargrid::CellID blockGID = simClasses.pargrid.getGlobalIDs()[blockLID];
-      
+
       // Calculate block i,j,k indices;
       unsigned int i_block,j_block,k_block;
       calculateBlockIndices(sim,blockGID,i_block,j_block,k_block);
-      
+
       // Set output pointers:
       dx = sim.dx_cell + i_block*block::WIDTH_X;
       dy = sim.dy_cell + j_block*block::WIDTH_Y;
       dz = sim.dz_cell + k_block*block::WIDTH_Z;
    }
-   
+
 } // namespace block
-   
+
 #endif

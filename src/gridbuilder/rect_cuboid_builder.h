@@ -28,7 +28,7 @@ class RectCuboidBuilder: public GridBuilder {
  public:
    RectCuboidBuilder();
    ~RectCuboidBuilder();
-   
+
    bool finalize();
    bool getCellIndices(unsigned int N_cells,const builder::ID* const cellIDs,builder::ID*& indices);
    bool getCellInfo(builder::ID cellOffsetStart,builder::ID cellOffsetEnd,
@@ -39,7 +39,7 @@ class RectCuboidBuilder: public GridBuilder {
    bool getMeshBoundingBox(Real& x_min,Real& y_min,Real& z_min,Real& dx0,Real& dy0,Real& dz0);
    bool getNumberOfCells(builder::ID& N_cells);
    bool initialize(Simulation& sim,SimulationClasses& simClasses,ConfigReader& cr);
-   
+
  private:
    bool initialized;
    bool periodic_x;                            /**< If true, x-coordinate is periodic.*/
@@ -57,7 +57,7 @@ class RectCuboidBuilder: public GridBuilder {
    Real dx;                                    /**< Cell size in x-direction.*/
    Real dy;                                    /**< Cell size in y-direction.*/
    Real dz;                                    /**< Cell size in z-direction.*/
-   
+
    void calculateCellIndices(builder::ID cellID,builder::ID& i,builder::ID& j,builder::ID& k);
    builder::ID calculateNeighbourID(builder::ID I,builder::ID J,builder::ID K,int i,int j,int k);
    unsigned char calculateNeighbourTypeID(int i,int j,int k);

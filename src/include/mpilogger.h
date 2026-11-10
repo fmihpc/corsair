@@ -46,7 +46,7 @@ class MPILogger {
  public:
    MPILogger();
    ~MPILogger();
-   
+
    void clear() {outStream.clear();}
    bool close();
    bool flush();
@@ -58,11 +58,11 @@ class MPILogger {
    // ****************************************
    // ****** STREAM INSERTION OPERATORS ******
    // ****************************************
-   
+
    template<typename T> inline MPILogger& operator<<(const T& value);
    MPILogger& operator<<(MPILogger& (*pf)(MPILogger&));
    MPILogger& operator<<(std::ostream& (*pf)(std::ostream& ));
-   
+
  private:
    bool fileOpen;                       /**< If true, the class has an open MPIFile.*/
    MPIFile mpiFile;                     /**< MPIFile which is used for parallel I/O.*/

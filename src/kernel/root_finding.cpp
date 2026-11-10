@@ -25,10 +25,10 @@
 using namespace std;
 
 namespace rootf {
- 
+
    Real bisection(Real (*function)(Real x),Real xmin,Real xmax,
 		  Real tol_dif,Real tol_min,int max_iter) {
-      
+
       int iterations = 0;
       Real a = xmin;
       Real b = xmax;
@@ -42,7 +42,7 @@ namespace rootf {
 	    root = 0.5 * (a + b);
 	    cont = false;
 	 }
-	 
+
 	 // Check if function value is close enough to zero
 	 Real m = 0.5 * (a + b);
 	 func_m = (*function)(m);
@@ -50,14 +50,14 @@ namespace rootf {
 	    root = m;
 	    cont = false;
 	 }
-	 
+
 	 // Split the interval between a and b. Choose new 
 	 // interval so that a solution exists.
 	 if (func_a * func_m < 0.0)
 	   b = m;
 	 else
 	   a = m;
-	    
+
 	 // Check if we've done too many iterations
 	 ++iterations;
 	 if (iterations > max_iter) {

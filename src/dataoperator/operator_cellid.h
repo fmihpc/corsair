@@ -25,7 +25,7 @@ class CellIDOP: public DataOperator {
  public:
    CellIDOP();
    ~CellIDOP();
-   
+
    bool finalize();
    std::string getName() const;
    bool initialize(ConfigReader& cr,Simulation& sim,SimulationClasses& simClasses);

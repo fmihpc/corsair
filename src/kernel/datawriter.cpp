@@ -43,7 +43,6 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    #if PROFILE_LEVEL > 0
       profile::start("File Open",fileOpenID);
    #endif
-   simClasses.logger << "(DATAWRITER) Starting to write simulation data (time step = "  << sim.timestep << ", time = " << sim.t << ")" << endl;
 
    // Create name for output file:
    stringstream ss;
@@ -51,9 +50,11 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    ss << "state" << setw(8) << sim.timestep << ".vlsv";
    string fileName;
    ss >> fileName;
-   
+
+   simClasses.logger << "(DATAWRITER) Starting to write save state: " << fileName << " (time step = "  << sim.timestep << ", time = " << sim.t << ")" << endl;
+
    const string meshName = "SpatialGrid";
-   
+
    // Open output file for parallel writing:
    if (simClasses.vlsv.open(fileName,sim.comm,sim.MASTER_RANK) == false) {
       simClasses.logger << "\t Failed to open output file '" << fileName << "'" << endl;
@@ -62,7 +63,7 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    #if PROFILE_LEVEL > 0
       profile::stop(); // file open
    #endif
-   
+
    // Write time and timestep:
    const Real t_start = MPI_Wtime();
    map<string,string> attributes;
@@ -97,7 +98,7 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    #if PROFILE_LEVEL > 0
       profile::stop(); // mesh writing
    #endif
-   
+
    // Write all DataOperators:
    #if PROFILE_LEVEL > 0
      profile::start("Data Operators",dataOperatorsID);
@@ -112,32 +113,32 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
 
    const Real t_total = MPI_Wtime() - t_start;
    const uint64_t bytesWritten = simClasses.vlsv.getBytesWritten();
-   
+
    // Close output file:
    #if PROFILE_LEVEL > 0
       profile::start("File Close",fileCloseID);
    #endif
-   
+
    if (simClasses.vlsv.close() == false) {
       simClasses.logger << "\t Error occurred while closing output file '" << fileName << "'" << endl;
       success = false;
    }
-   
+
    // Check that all processes succeeded in data writing:
    unsigned int successSum = 0;
    unsigned int mySuccess = 0;
    if (success == false) ++mySuccess;
-   
+
    #if PROFILE_LEVEL > 1
       profile::start("allreduce",allReduceID);
    #endif
-   
+
    MPI_Allreduce(&mySuccess,&successSum,1,MPI_Type<unsigned int>(),MPI_SUM,sim.comm);
-   
+
    #if PROFILE_LEVEL > 1
       profile::stop(); // allreduce
    #endif
-   
+
    if (successSum > 0) {
       simClasses.logger << "\t " << successSum << " processes failed to write data!" << endl;
       success = false;
@@ -153,7 +154,7 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
       divider = 1.0e6;
       units = "MB";
    }
-   
+
    Real datarate = bytesWritten/t_total;
    string datarateUnits = "kB/s";
    if (datarate >= 1.0e9) {
@@ -165,14 +166,14 @@ bool saveState(Simulation& sim,SimulationClasses& simClasses,DataOperatorContain
    } else {
       datarate /= 1.0e3;
    }
-   
+
    simClasses.logger
      << "\t Wrote " << bytesWritten/divider << ' ' << units << " in " << t_total << " seconds, " << "throughput " << datarate << ' ' << datarateUnits << "." << endl;
 
-   if(successSum < 1) { simClasses.logger << "\t Writing successful." << endl; }
+   if (successSum < 1) { simClasses.logger << "\t Writing successful." << endl; }
    else { simClasses.logger << "\t Writing failed." << endl; }
    simClasses.logger << endl;
-   
+
    #if PROFILE_LEVEL > 0
       profile::stop(); // datawriter finalize
    #endif
